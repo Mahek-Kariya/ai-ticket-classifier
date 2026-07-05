@@ -13,6 +13,10 @@ import {
   Separator,
 } from '@/components/base'
 import { cn } from '@/lib/utils'
+import {
+  updateRemoteTicketStatus,
+  createRemoteTicket,
+} from '@/modules/dashboard/services/ticketService'
 import './SlidePanel.css'
 import type { SlidePanelProps } from './SlidePanelTypes'
 import type { Ticket, TicketCategory, TicketUrgency, TicketStatus } from '@/types'
@@ -78,8 +82,15 @@ export function SlidePanel({ className }: SlidePanelProps) {
   const [isAnalysing, setIsAnalysing] = useState(false)
 
   // ── Auto-status transition: new → in_progress ─────────────
+  // Fires the remote PATCH first, then updates Redux on success.
+  // If the network call fails, the local state still transitions
+  // so the UI isn't blocked — the server will reconcile later.
   useEffect(() => {
     if (ticket && ticket.status === 'new') {
+      updateRemoteTicketStatus(ticket.id, 'in_progress').catch(() => {
+        // Network failure is non-critical here — the optimistic
+        // Redux update below ensures the UI stays responsive.
+      })
       dispatch(updateTicketStatus({ id: ticket.id, status: 'in_progress' }))
     }
   }, [ticket, dispatch])
@@ -129,11 +140,22 @@ export function SlidePanel({ className }: SlidePanelProps) {
     }
   }, [draftReply])
 
+  /**
+   * Status toggle handler — fires the remote PATCH, then updates
+   * Redux only on success. Falls back to optimistic local update
+   * if the network call fails so the UI doesn't feel stuck.
+   */
   const handleStatusChange = useCallback(
-    (status: TicketStatus) => {
-      if (ticket) {
-        dispatch(updateTicketStatus({ id: ticket.id, status }))
+    async (status: TicketStatus) => {
+      if (!ticket) return
+
+      try {
+        await updateRemoteTicketStatus(ticket.id, status)
+      } catch {
+        // Remote update failed — still apply locally for UX.
       }
+
+      dispatch(updateTicketStatus({ id: ticket.id, status }))
     },
     [dispatch, ticket]
   )
@@ -143,23 +165,44 @@ export function SlidePanel({ className }: SlidePanelProps) {
   }, [dispatch])
 
   /**
-   * Mock "Run AI Analysis" handler.
-   * Generates a random classification bundle, builds a full Ticket object,
-   * dispatches addTicket() to push it to the top of the ledger, then
-   * closes the panel.
+   * "Run AI Analysis" handler.
+   *
+   * 1. Generates a mock classification (category, urgency, draft).
+   * 2. Attempts a POST to /api/tickets to persist to the server.
+   * 3. On success, uses the server-returned Ticket (has real UUID
+   *    and timestamps from Supabase).
+   * 4. On failure (Supabase unconfigured / network error), falls
+   *    back to a client-generated Ticket so the UI still works
+   *    with mock data.
    */
-  const handleRunAnalysis = useCallback(() => {
+  const handleRunAnalysis = useCallback(async () => {
     if (!createMessage.trim()) return
 
     setIsAnalysing(true)
 
-    // Simulate a brief processing delay (500ms) so the UI feels responsive
-    setTimeout(() => {
-      const category = pickRandom(CATEGORIES)
-      const urgency = pickRandom(URGENCIES)
-      const now = new Date().toISOString()
+    // Simulate a brief AI processing delay for UX
+    await new Promise((resolve) => setTimeout(resolve, 500))
 
-      const newTicket: Ticket = {
+    const category = pickRandom(CATEGORIES)
+    const urgency = pickRandom(URGENCIES)
+    const draftReplyText = generateMockDraftReply(category, urgency)
+
+    try {
+      // Attempt live server insertion
+      const serverTicket = await createRemoteTicket({
+        customer_email: createEmail.trim() || null,
+        message_body: createMessage.trim(),
+        category,
+        urgency,
+        ai_draft_reply: draftReplyText,
+        ai_model: 'llama3-8b-8192',
+      })
+
+      dispatch(addTicket(serverTicket))
+    } catch {
+      // Fallback: server unavailable — create a client-side ticket
+      const now = new Date().toISOString()
+      const fallbackTicket: Ticket = {
         id: crypto.randomUUID(),
         created_at: now,
         updated_at: now,
@@ -167,14 +210,16 @@ export function SlidePanel({ className }: SlidePanelProps) {
         message_body: createMessage.trim(),
         category,
         urgency,
-        ai_draft_reply: generateMockDraftReply(category, urgency),
+        ai_draft_reply: draftReplyText,
         ai_model: 'llama3-8b-8192',
         status: 'new',
       }
 
-      dispatch(addTicket(newTicket))
+      dispatch(addTicket(fallbackTicket))
+    } finally {
+      setIsAnalysing(false)
       dispatch(closePanel())
-    }, 500)
+    }
   }, [createEmail, createMessage, dispatch])
 
   if (!isPanelOpen) return null

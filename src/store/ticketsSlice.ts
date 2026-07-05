@@ -2,9 +2,9 @@
  * ticketsSlice.ts
  *
  * Redux Toolkit slice for ticket state management.
- * Pre-populated with MOCK_TICKETS for Phase 1 (static dashboard UI).
- * Once Supabase is wired, the initial items will default to [] and
- * be hydrated via an async thunk.
+ * Items start empty and are hydrated from the API on mount.
+ * The API route falls back to MOCK_TICKETS when Supabase is
+ * unconfigured, so the client layer needs no mock awareness.
  */
 
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
@@ -15,7 +15,6 @@ import type {
   TicketStatus,
   TicketFilters,
 } from "@/types";
-import { MOCK_TICKETS } from "@/modules/dashboard/lib/mock-data";
 
 // ============================================================
 // STATE SHAPE
@@ -23,13 +22,17 @@ import { MOCK_TICKETS } from "@/modules/dashboard/lib/mock-data";
 
 interface TicketsState {
   items: Ticket[];
+  loading: boolean;
+  error: string | null;
   filters: TicketFilters;
   selectedTicketId: string | null;
   isPanelOpen: boolean;
 }
 
 const initialState: TicketsState = {
-  items: MOCK_TICKETS,
+  items: [],
+  loading: true,
+  error: null,
   filters: {
     category: "all",
     urgency: "all",
@@ -47,6 +50,17 @@ const ticketsSlice = createSlice({
   name: "tickets",
   initialState,
   reducers: {
+    // ---- Hydration / async lifecycle ----
+    setTickets(state, action: PayloadAction<Ticket[]>) {
+      state.items = action.payload;
+    },
+    setLoading(state, action: PayloadAction<boolean>) {
+      state.loading = action.payload;
+    },
+    setError(state, action: PayloadAction<string | null>) {
+      state.error = action.payload;
+    },
+
     // ---- Filter actions ----
     setCategoryFilter(state, action: PayloadAction<TicketCategory | "all">) {
       state.filters.category = action.payload;
@@ -89,6 +103,9 @@ const ticketsSlice = createSlice({
 });
 
 export const {
+  setTickets,
+  setLoading,
+  setError,
   setCategoryFilter,
   setUrgencyFilter,
   setSearchFilter,

@@ -6,13 +6,14 @@ interface SkeletonProps {
   className?: string
   width?:     string | number
   height?:    string | number
+  style?:     React.CSSProperties
 }
 
-export function Skeleton({ className, width, height }: SkeletonProps) {
+export function Skeleton({ className, width, height, style }: SkeletonProps) {
   return (
     <ShadSkeleton
       className={cn('skeleton-base animate-shimmer', className)}
-      style={{ width, height }}
+      style={{ width, height, ...style }}
     />
   )
 }

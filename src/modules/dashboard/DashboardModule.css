@@ -104,3 +104,79 @@
   padding: 0 var(--space-12) var(--space-12);
   flex: 1;
 }
+
+/* ── Loading Skeleton Styles ──────────────────────────────── */
+
+.dashboard-loading-hero {
+  background: linear-gradient(135deg, #1e1b4b 0%, #4c1d95 50%, #7c3aed 100%);
+  padding: var(--space-16) var(--space-12) var(--space-20);
+}
+
+.dashboard-loading-hero-inner {
+  max-width: 1400px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.dashboard-loading-hero-title {
+  margin-top: var(--space-2);
+  margin-bottom: var(--space-1);
+}
+
+.dashboard-loading-stats {
+  max-width: 1400px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 0 var(--space-12);
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-6);
+  margin-top: calc(-1 * var(--space-10));
+  position: relative;
+  z-index: 10;
+}
+
+.dashboard-loading-action-sub {
+  margin-top: var(--space-2);
+}
+
+.dashboard-loading-btn {
+  border-radius: var(--radius-lg);
+}
+
+.dashboard-loading-table {
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-2xl);
+  overflow: hidden;
+}
+
+.dashboard-loading-table-header {
+  display: flex;
+  gap: var(--space-2);
+  padding: var(--space-4) var(--space-6);
+  border-bottom: 1px solid var(--color-border-subtle);
+}
+
+.dashboard-loading-pill {
+  border-radius: var(--radius-full);
+}
+
+/* ── Error Banner ─────────────────────────────────────────── */
+
+.dashboard-error-banner {
+  background-color: var(--color-badge-complaint-bg, #fff1f2);
+  border: 1px solid var(--color-badge-complaint-text, #be123c);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4) var(--space-6);
+  margin-bottom: var(--space-4);
+}
+
+.dashboard-error-text {
+  color: var(--color-badge-complaint-text, #be123c);
+  font-size: var(--text-sm);
+  margin: 0;
+}
+
