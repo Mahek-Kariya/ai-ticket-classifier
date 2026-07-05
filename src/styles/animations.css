@@ -1,0 +1,235 @@
+/**
+ * animations.css
+ *
+ * Keyframes and animation utility classes for the support dashboard.
+ * All durations and easings reference tokens from variables.css.
+ *
+ * DO NOT put component layout or colour styles here. Motion only.
+ */
+
+/* ============================================================
+   KEYFRAMES
+   ============================================================ */
+
+/* Slide panel — enters from the right */
+@keyframes panel-slide-in {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes panel-slide-out {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}
+
+/* Overlay dim — fades in behind the slide panel */
+@keyframes overlay-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes overlay-fade-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+/* General fade-in — stat cards, hero content */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Scale-in — badges, toast notifications */
+@keyframes scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Skeleton shimmer — loading placeholders */
+@keyframes shimmer {
+  0% {
+    background-position: -400px 0;
+  }
+  100% {
+    background-position: 400px 0;
+  }
+}
+
+/* Pulse dot — "Live" indicator in hero card */
+@keyframes pulse-dot {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.5;
+    transform: scale(1.4);
+  }
+}
+
+/* Spin — used on loading spinners */
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Progress bar fill — resolves week stat card */
+@keyframes progress-fill {
+  from {
+    width: 0%;
+  }
+  to {
+    width: var(--progress-target, 73%);
+  }
+}
+
+/* Toast slide-up */
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* ============================================================
+   ANIMATION UTILITY CLASSES
+   ============================================================ */
+
+/* Panel */
+.animate-panel-in {
+  animation: panel-slide-in var(--duration-panel) var(--ease-panel) both;
+}
+
+.animate-panel-out {
+  animation: panel-slide-out var(--duration-panel) var(--ease-panel) both;
+}
+
+/* Overlay */
+.animate-overlay-in {
+  animation: overlay-fade-in var(--duration-slow) var(--ease-default) both;
+}
+
+.animate-overlay-out {
+  animation: overlay-fade-out var(--duration-slow) var(--ease-default) both;
+}
+
+/* Fade in — staggered via CSS custom property */
+.animate-fade-in {
+  animation: fade-in var(--duration-slow) var(--ease-default) both;
+  animation-delay: var(--stagger, 0ms);
+}
+
+/* Scale in */
+.animate-scale-in {
+  animation: scale-in var(--duration-normal) var(--ease-spring) both;
+}
+
+/* Skeleton shimmer */
+.animate-shimmer {
+  background: linear-gradient(90deg, #f0edf8 25%, #e8e4f4 50%, #f0edf8 75%);
+  background-size: 800px 100%;
+  animation: shimmer 1.4s ease-in-out infinite;
+}
+
+/* Pulse dot */
+.animate-pulse-dot {
+  animation: pulse-dot 1.8s ease-in-out infinite;
+}
+
+/* Spin */
+.animate-spin {
+  animation: spin 0.7s linear infinite;
+}
+
+/* Progress bar */
+.animate-progress {
+  animation: progress-fill 0.8s var(--ease-default) both;
+  animation-delay: 300ms;
+}
+
+/* Toast */
+.animate-toast-in {
+  animation: toast-in var(--duration-normal) var(--ease-spring) both;
+}
+
+/* ============================================================
+   STAGGER HELPERS
+   Apply to parent; children receive incremental delays.
+   Usage: <ul class="stagger-children"> <li class="animate-fade-in"> ...
+   ============================================================ */
+
+.stagger-children > *:nth-child(1) {
+  --stagger: 0ms;
+}
+.stagger-children > *:nth-child(2) {
+  --stagger: 60ms;
+}
+.stagger-children > *:nth-child(3) {
+  --stagger: 120ms;
+}
+.stagger-children > *:nth-child(4) {
+  --stagger: 180ms;
+}
+.stagger-children > *:nth-child(5) {
+  --stagger: 240ms;
+}
+.stagger-children > *:nth-child(6) {
+  --stagger: 300ms;
+}
+
+/* ============================================================
+   REDUCED MOTION — always the last rule
+   Users who prefer reduced motion get instant transitions only.
+   ============================================================ */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

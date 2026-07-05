@@ -1,0 +1,206 @@
+/**
+ * typography.css
+ *
+ * Base typographic styles applied globally.
+ * Fonts are loaded via next/font in layout.tsx and exposed as CSS variables:
+ *   --font-inter            (set by Next.js font loader)
+ *   --font-jetbrains-mono   (set by Next.js font loader)
+ *
+ * This file consumes those variables and applies them to elements.
+ * Do NOT import fonts here — that is handled by layout.tsx.
+ */
+
+/* ============================================================
+   BASE ELEMENT STYLES
+   ============================================================ */
+
+html {
+  font-family: var(--font-sans);
+  font-size: 16px;
+  line-height: var(--leading-normal);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  font-feature-settings:
+    "kern" 1,
+    "liga" 1,
+    "calt" 1;
+}
+
+body {
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  font-weight: var(--font-weight-normal);
+  color: var(--color-text-primary);
+  background-color: var(--color-bg-page);
+}
+
+/* ============================================================
+   HEADING SCALE
+   Inter — tight tracking, heavy weight, premium linear feel
+   ============================================================ */
+
+h1 {
+  font-family: var(--font-sans);
+  font-size: var(--text-4xl);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--leading-tight);
+  letter-spacing: var(--tracking-tight);
+  color: var(--color-text-primary);
+}
+
+h2 {
+  font-family: var(--font-sans);
+  font-size: var(--text-2xl);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--leading-tight);
+  letter-spacing: var(--tracking-tight);
+  color: var(--color-text-primary);
+}
+
+h3 {
+  font-family: var(--font-sans);
+  font-size: var(--text-xl);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--leading-snug);
+  letter-spacing: var(--tracking-tight);
+  color: var(--color-text-primary);
+}
+
+h4 {
+  font-family: var(--font-sans);
+  font-size: var(--text-lg);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--leading-snug);
+  color: var(--color-text-primary);
+}
+
+h5,
+h6 {
+  font-family: var(--font-sans);
+  font-size: var(--text-base);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--leading-normal);
+  color: var(--color-text-secondary);
+}
+
+/* ============================================================
+   BODY TEXT
+   ============================================================ */
+
+p {
+  font-size: var(--text-sm);
+  line-height: var(--leading-relaxed);
+  color: var(--color-text-secondary);
+}
+
+small {
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+}
+
+/* ============================================================
+   MONOSPACE — ticket IDs, timestamps, emails, model names
+   JetBrains Mono — numbers align perfectly, very professional
+   ============================================================ */
+
+code,
+kbd,
+pre,
+samp,
+.font-mono {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  font-weight: var(--font-weight-normal);
+  font-feature-settings:
+    "liga" 0,
+    "calt" 0; /* disable ligatures in data */
+}
+
+/* Ticket ID style — used in table and panel header */
+.ticket-id {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-muted);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+}
+
+/* Email address style — monospace, truncated */
+.email-mono {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Timestamp style */
+.timestamp {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--color-text-faint);
+  white-space: nowrap;
+}
+
+/* ============================================================
+   LABEL STYLES — uppercase section labels
+   e.g. "ORIGINAL MESSAGE", "AI-POWERED SUPPORT"
+   ============================================================ */
+
+.label-caps {
+  font-family: var(--font-sans);
+  font-size: var(--text-2xs);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: var(--tracking-widest);
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+/* Hero banner version — on dark background */
+.label-caps-hero {
+  font-family: var(--font-sans);
+  font-size: var(--text-2xs);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: var(--tracking-widest);
+  text-transform: uppercase;
+  color: #c4b5fd; /* violet-300 */
+}
+
+/* ============================================================
+   STAT CARD NUMBER — large metric display
+   ============================================================ */
+
+.stat-number {
+  font-family: var(--font-sans);
+  font-size: var(--text-3xl);
+  font-weight: var(--font-weight-bold);
+  line-height: 1;
+  letter-spacing: var(--tracking-tight);
+  color: var(--color-text-primary);
+}
+
+/* ============================================================
+   LINK STYLES
+   ============================================================ */
+
+a {
+  color: var(--color-brand-primary);
+  text-decoration: none;
+  transition: color var(--duration-fast) var(--ease-default);
+}
+
+a:hover {
+  color: var(--color-brand-light);
+}
+
+/* ============================================================
+   SELECTION
+   ============================================================ */
+
+::selection {
+  background-color: #ede9fe; /* violet-100 */
+  color: var(--color-brand-darkest);
+}
