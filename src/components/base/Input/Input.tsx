@@ -1,7 +1,7 @@
-import { Input as ShadInput } from '@/components/ui/input'
-import { cn } from '@/lib/utils'
-import './Input.css'
-import type { BaseInputProps } from './InputTypes'
+import { Input as ShadInput } from "@/components/ui/input";
+import { cn } from "@/lib/utils";
+import "./Input.css";
+import type { BaseInputProps } from "./InputTypes";
 
 export function Input({
   leftIcon,
@@ -21,7 +21,7 @@ export function Input({
         </label>
       )}
 
-      <div style={{ position: 'relative' }}>
+      <div style={{ position: "relative" }}>
         {leftIcon && (
           <span className="input-icon-left" aria-hidden="true">
             {leftIcon}
@@ -31,12 +31,12 @@ export function Input({
         <ShadInput
           id={id}
           className={cn(
-            'input-field',
-            leftIcon  && 'has-left-icon',
-            rightIcon && 'has-right-icon',
+            "input-field",
+            leftIcon && "has-left-icon",
+            rightIcon && "has-right-icon",
             className,
           )}
-          data-error={error ? 'true' : undefined}
+          data-error={error ? "true" : undefined}
           {...props}
         />
 
@@ -47,8 +47,12 @@ export function Input({
         )}
       </div>
 
-      {error  && <p className="input-error-text" role="alert">{error}</p>}
+      {error && (
+        <p className="input-error-text" role="alert">
+          {error}
+        </p>
+      )}
       {!error && hint && <p className="input-hint">{hint}</p>}
     </div>
-  )
+  );
 }

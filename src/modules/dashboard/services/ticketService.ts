@@ -10,7 +10,7 @@
  * try/catch block or pass the promise to an async thunk.
  */
 
-import type { ApiResponse, Ticket, TicketStatus } from '@/types'
+import type { ApiResponse, Ticket, TicketStatus } from "@/types";
 
 // ── Helpers ──────────────────────────────────────────────────
 
@@ -20,30 +20,30 @@ import type { ApiResponse, Ticket, TicketStatus } from '@/types'
  */
 async function unwrapResponse<T>(
   response: Response,
-  context: string
+  context: string,
 ): Promise<T> {
   if (!response.ok) {
     // Attempt to parse a structured error from the body
-    let serverMessage: string | null = null
+    let serverMessage: string | null = null;
     try {
-      const body = (await response.json()) as ApiResponse<unknown>
-      serverMessage = body.error
+      const body = (await response.json()) as ApiResponse<unknown>;
+      serverMessage = body.error;
     } catch {
       // Body wasn't JSON — fall through to generic message
     }
 
     throw new Error(
-      serverMessage ?? `${context}: server responded with ${response.status}`
-    )
+      serverMessage ?? `${context}: server responded with ${response.status}`,
+    );
   }
 
-  const body = (await response.json()) as ApiResponse<T>
+  const body = (await response.json()) as ApiResponse<T>;
 
   if (body.error) {
-    throw new Error(body.error)
+    throw new Error(body.error);
   }
 
-  return body.data as T
+  return body.data as T;
 }
 
 // ── Public API ───────────────────────────────────────────────
@@ -54,15 +54,15 @@ async function unwrapResponse<T>(
  * when Supabase credentials are unavailable.
  */
 export async function fetchDashboardTickets(): Promise<Ticket[]> {
-  const response = await fetch('/api/tickets', {
-    method: 'GET',
-    headers: { 'Content-Type': 'application/json' },
+  const response = await fetch("/api/tickets", {
+    method: "GET",
+    headers: { "Content-Type": "application/json" },
     // Next.js 15+ uses 'no-store' by default for fetch in client
     // components, but we're explicit to avoid caching stale tickets.
-    cache: 'no-store',
-  })
+    cache: "no-store",
+  });
 
-  return unwrapResponse<Ticket[]>(response, 'fetchDashboardTickets')
+  return unwrapResponse<Ticket[]>(response, "fetchDashboardTickets");
 }
 
 /**
@@ -71,15 +71,15 @@ export async function fetchDashboardTickets(): Promise<Ticket[]> {
  */
 export async function updateRemoteTicketStatus(
   id: string,
-  status: TicketStatus
+  status: TicketStatus,
 ): Promise<Ticket> {
   const response = await fetch(`/api/tickets/${encodeURIComponent(id)}`, {
-    method: 'PATCH',
-    headers: { 'Content-Type': 'application/json' },
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ status }),
-  })
+  });
 
-  return unwrapResponse<Ticket>(response, 'updateRemoteTicketStatus')
+  return unwrapResponse<Ticket>(response, "updateRemoteTicketStatus");
 }
 
 /**
@@ -87,12 +87,12 @@ export async function updateRemoteTicketStatus(
  * Mirrors the CreateTicketBody interface in the API route.
  */
 export interface CreateTicketPayload {
-  customer_email?: string | null
-  message_body: string
-  category: Ticket['category']
-  urgency: Ticket['urgency']
-  ai_draft_reply: string
-  ai_model: string
+  customer_email?: string | null;
+  message_body: string;
+  category: Ticket["category"];
+  urgency: Ticket["urgency"];
+  ai_draft_reply: string;
+  ai_model: string;
 }
 
 /**
@@ -104,13 +104,13 @@ export interface CreateTicketPayload {
  * so callers should catch and fall back to a client-generated ticket.
  */
 export async function createRemoteTicket(
-  payload: CreateTicketPayload
+  payload: CreateTicketPayload,
 ): Promise<Ticket> {
-  const response = await fetch('/api/tickets', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+  const response = await fetch("/api/tickets", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),
-  })
+  });
 
-  return unwrapResponse<Ticket>(response, 'createRemoteTicket')
+  return unwrapResponse<Ticket>(response, "createRemoteTicket");
 }

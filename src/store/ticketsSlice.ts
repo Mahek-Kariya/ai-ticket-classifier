@@ -81,7 +81,7 @@ const ticketsSlice = createSlice({
     },
     updateTicketStatus(
       state,
-      action: PayloadAction<{ id: string; status: TicketStatus }>
+      action: PayloadAction<{ id: string; status: TicketStatus }>,
     ) {
       const ticket = state.items.find((t) => t.id === action.payload.id);
       if (ticket) {

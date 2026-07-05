@@ -1,2 +1,2 @@
-export { Textarea } from './Textarea'
-export type { BaseTextareaProps, TextareaVariant } from './TextareaTypes'
+export { Textarea } from "./Textarea";
+export type { BaseTextareaProps, TextareaVariant } from "./TextareaTypes";

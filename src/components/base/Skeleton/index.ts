@@ -1,1 +1,1 @@
-export { Skeleton, SkeletonTableRow, SkeletonStatCard } from './Skeleton'
+export { Skeleton, SkeletonTableRow, SkeletonStatCard } from "./Skeleton";

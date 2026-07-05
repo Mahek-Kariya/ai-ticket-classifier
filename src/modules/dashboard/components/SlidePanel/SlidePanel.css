@@ -45,8 +45,9 @@
   height: 32px;
   border-radius: var(--radius-md);
   color: var(--color-text-muted);
-  transition: background-color var(--duration-fast) var(--ease-default),
-              color var(--duration-fast) var(--ease-default);
+  transition:
+    background-color var(--duration-fast) var(--ease-default),
+    color var(--duration-fast) var(--ease-default);
   cursor: pointer;
   background: none;
   border: none;
@@ -196,4 +197,3 @@
   color: var(--color-text-muted);
   margin-top: var(--space-1);
 }
-

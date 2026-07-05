@@ -1,3 +1,3 @@
 export interface TicketLedgerProps {
-  className?: string
+  className?: string;
 }

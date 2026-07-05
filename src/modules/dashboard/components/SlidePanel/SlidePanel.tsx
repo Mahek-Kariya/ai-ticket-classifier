@@ -1,9 +1,14 @@
-'use client'
+"use client";
 
-import { useState, useEffect, useRef, useCallback } from 'react'
-import { X, Sparkles, Copy, MessageSquare, Loader2 } from 'lucide-react'
-import { useAppSelector, useAppDispatch } from '@/store/hooks'
-import { closePanel, updateTicketStatus, addTicket, openPanel } from '@/store/ticketsSlice'
+import { useState, useEffect, useRef, useCallback } from "react";
+import { X, Sparkles, Copy, MessageSquare, Loader2 } from "lucide-react";
+import { useAppSelector, useAppDispatch } from "@/store/hooks";
+import {
+  closePanel,
+  updateTicketStatus,
+  addTicket,
+  openPanel,
+} from "@/store/ticketsSlice";
 import {
   Button,
   Input,
@@ -11,107 +16,108 @@ import {
   UrgencyBadge,
   StatusBadge,
   Separator,
-} from '@/components/base'
-import { cn } from '@/lib/utils'
-import {
-  updateRemoteTicketStatus,
-} from '@/modules/dashboard/services/ticketService'
-import './SlidePanel.css'
-import type { SlidePanelProps } from './SlidePanelTypes'
-import type { Ticket, TicketStatus, ApiResponse } from '@/types'
+} from "@/components/base";
+import { cn } from "@/lib/utils";
+import { updateRemoteTicketStatus } from "@/modules/dashboard/services/ticketService";
+import "./SlidePanel.css";
+import type { SlidePanelProps } from "./SlidePanelTypes";
+import type { Ticket, TicketStatus, ApiResponse } from "@/types";
 
 // ── Constants ────────────────────────────────────────────────
 const STATUS_OPTIONS: Array<{ value: TicketStatus; label: string }> = [
-  { value: 'new', label: 'New' },
-  { value: 'in_progress', label: 'In Progress' },
-  { value: 'resolved', label: 'Resolved' },
-]
+  { value: "new", label: "New" },
+  { value: "in_progress", label: "In Progress" },
+  { value: "resolved", label: "Resolved" },
+];
 
 // ── Component ────────────────────────────────────────────────
 
 export function SlidePanel({ className }: SlidePanelProps) {
-  const dispatch = useAppDispatch()
-  const isPanelOpen = useAppSelector((state) => state.tickets.isPanelOpen)
-  const selectedTicketId = useAppSelector((state) => state.tickets.selectedTicketId)
-  const ticket = useAppSelector((state) =>
-    state.tickets.items.find((t) => t.id === selectedTicketId) ?? null
-  )
+  const dispatch = useAppDispatch();
+  const isPanelOpen = useAppSelector((state) => state.tickets.isPanelOpen);
+  const selectedTicketId = useAppSelector(
+    (state) => state.tickets.selectedTicketId,
+  );
+  const ticket = useAppSelector(
+    (state) =>
+      state.tickets.items.find((t) => t.id === selectedTicketId) ?? null,
+  );
 
   // Determine if we're in "create" mode (the __new__ sentinel)
-  const isCreateMode = isPanelOpen && selectedTicketId === '__new__'
+  const isCreateMode = isPanelOpen && selectedTicketId === "__new__";
 
   // ---- Existing ticket state ----
-  const [draftReply, setDraftReply] = useState('')
-  const [copied, setCopied] = useState(false)
-  const textareaRef = useRef<HTMLTextAreaElement>(null)
+  const [draftReply, setDraftReply] = useState("");
+  const [copied, setCopied] = useState(false);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   // ---- Creation form state ----
-  const [createEmail, setCreateEmail] = useState('')
-  const [createMessage, setCreateMessage] = useState('')
-  const [isAnalysing, setIsAnalysing] = useState(false)
-  const [analysisError, setAnalysisError] = useState<string | null>(null)
+  const [createEmail, setCreateEmail] = useState("");
+  const [createMessage, setCreateMessage] = useState("");
+  const [isAnalysing, setIsAnalysing] = useState(false);
+  const [analysisError, setAnalysisError] = useState<string | null>(null);
 
   // ── Auto-status transition: new → in_progress ─────────────
   // Fires the remote PATCH first, then updates Redux on success.
   // If the network call fails, the local state still transitions
   // so the UI isn't blocked — the server will reconcile later.
   useEffect(() => {
-    if (ticket && ticket.status === 'new') {
-      updateRemoteTicketStatus(ticket.id, 'in_progress').catch(() => {
+    if (ticket && ticket.status === "new") {
+      updateRemoteTicketStatus(ticket.id, "in_progress").catch(() => {
         // Network failure is non-critical here — the optimistic
         // Redux update below ensures the UI stays responsive.
-      })
-      dispatch(updateTicketStatus({ id: ticket.id, status: 'in_progress' }))
+      });
+      dispatch(updateTicketStatus({ id: ticket.id, status: "in_progress" }));
     }
-  }, [ticket, dispatch])
+  }, [ticket, dispatch]);
 
   // ── Sync draft reply when a ticket is loaded ──────────────
   useEffect(() => {
     if (ticket) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
-      setDraftReply(ticket.ai_draft_reply)
+      setDraftReply(ticket.ai_draft_reply);
     } else {
-      setDraftReply('')
+      setDraftReply("");
     }
-  }, [ticket])
+  }, [ticket]);
 
   // ── Reset creation form when entering create mode ─────────
   useEffect(() => {
     if (isCreateMode) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
-      setCreateEmail('')
-      setCreateMessage('')
-      setIsAnalysing(false)
-      setAnalysisError(null)
+      setCreateEmail("");
+      setCreateMessage("");
+      setIsAnalysing(false);
+      setAnalysisError(null);
     }
-  }, [isCreateMode])
+  }, [isCreateMode]);
 
   // ── Auto-resize AI reply textarea ─────────────────────────
   useEffect(() => {
-    const el = textareaRef.current
-    if (!el) return
-    el.style.height = 'auto'
-    el.style.height = `${el.scrollHeight}px`
-  }, [draftReply])
+    const el = textareaRef.current;
+    if (!el) return;
+    el.style.height = "auto";
+    el.style.height = `${el.scrollHeight}px`;
+  }, [draftReply]);
 
   // ── Handlers ──────────────────────────────────────────────
 
   const handleCopy = useCallback(async () => {
     try {
-      await navigator.clipboard.writeText(draftReply)
-      setCopied(true)
-      setTimeout(() => setCopied(false), 2000)
+      await navigator.clipboard.writeText(draftReply);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
     } catch {
-      const textarea = document.createElement('textarea')
-      textarea.value = draftReply
-      document.body.appendChild(textarea)
-      textarea.select()
-      document.execCommand('copy')
-      document.body.removeChild(textarea)
-      setCopied(true)
-      setTimeout(() => setCopied(false), 2000)
+      const textarea = document.createElement("textarea");
+      textarea.value = draftReply;
+      document.body.appendChild(textarea);
+      textarea.select();
+      document.execCommand("copy");
+      document.body.removeChild(textarea);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
     }
-  }, [draftReply])
+  }, [draftReply]);
 
   /**
    * Status toggle handler — fires the remote PATCH, then updates
@@ -120,22 +126,22 @@ export function SlidePanel({ className }: SlidePanelProps) {
    */
   const handleStatusChange = useCallback(
     async (status: TicketStatus) => {
-      if (!ticket) return
+      if (!ticket) return;
 
       try {
-        await updateRemoteTicketStatus(ticket.id, status)
+        await updateRemoteTicketStatus(ticket.id, status);
       } catch {
         // Remote update failed — still apply locally for UX.
       }
 
-      dispatch(updateTicketStatus({ id: ticket.id, status }))
+      dispatch(updateTicketStatus({ id: ticket.id, status }));
     },
-    [dispatch, ticket]
-  )
+    [dispatch, ticket],
+  );
 
   const handleClose = useCallback(() => {
-    dispatch(closePanel())
-  }, [dispatch])
+    dispatch(closePanel());
+  }, [dispatch]);
 
   /**
    * "Run AI Analysis" handler.
@@ -149,50 +155,55 @@ export function SlidePanel({ className }: SlidePanelProps) {
    *    with mock data.
    */
   const handleRunAnalysis = useCallback(async () => {
-    if (!createMessage.trim()) return
+    if (!createMessage.trim()) return;
 
-    setIsAnalysing(true)
-    setAnalysisError(null)
+    setIsAnalysing(true);
+    setAnalysisError(null);
 
     try {
-      const response = await fetch('/api/classify', {
-        method: 'POST',
+      const response = await fetch("/api/classify", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           message: createMessage.trim(),
           customer_email: createEmail.trim() || undefined,
         }),
-      })
+      });
 
       if (!response.ok) {
-        const errData = await response.json().catch(() => null)
-        throw new Error(errData?.error || `Server returned status ${response.status}`)
+        const errData = await response.json().catch(() => null);
+        throw new Error(
+          errData?.error || `Server returned status ${response.status}`,
+        );
       }
 
-      const result: ApiResponse<Ticket> = await response.json()
+      const result: ApiResponse<Ticket> = await response.json();
       if (result.error || !result.data) {
-        throw new Error(result.error || 'Failed to classify message.')
+        throw new Error(result.error || "Failed to classify message.");
       }
 
-      const serverTicket = result.data
+      const serverTicket = result.data;
 
       // Add to Redux store so the dashboard updates
-      dispatch(addTicket(serverTicket))
-      
-      // Transition slide panel to show the newly created ticket
-      dispatch(openPanel(serverTicket.id))
-    } catch (err: unknown) {
-      console.error('AI Analysis failed:', err)
-      const errMessage = err instanceof Error ? err.message : 'An unexpected error occurred during analysis.'
-      setAnalysisError(errMessage)
-    } finally {
-      setIsAnalysing(false)
-    }
-  }, [createEmail, createMessage, dispatch])
+      dispatch(addTicket(serverTicket));
 
-  if (!isPanelOpen) return null
+      // Transition slide panel to show the newly created ticket
+      dispatch(openPanel(serverTicket.id));
+    } catch (err: unknown) {
+      console.error("AI Analysis failed:", err);
+      const errMessage =
+        err instanceof Error
+          ? err.message
+          : "An unexpected error occurred during analysis.";
+      setAnalysisError(errMessage);
+    } finally {
+      setIsAnalysing(false);
+    }
+  }, [createEmail, createMessage, dispatch]);
+
+  if (!isPanelOpen) return null;
 
   return (
     <>
@@ -203,13 +214,13 @@ export function SlidePanel({ className }: SlidePanelProps) {
       />
 
       <aside
-        className={cn('slide-panel animate-panel-in', className)}
+        className={cn("slide-panel animate-panel-in", className)}
         role="dialog"
-        aria-label={ticket ? 'Ticket details' : 'Process new message'}
+        aria-label={ticket ? "Ticket details" : "Process new message"}
       >
         <div className="slide-panel-header">
           <span className="slide-panel-header-id">
-            {ticket ? `Ticket ${ticket.id.slice(0, 8)}\u2026` : 'New Message'}
+            {ticket ? `Ticket ${ticket.id.slice(0, 8)}\u2026` : "New Message"}
           </span>
           <button
             className="slide-panel-close"
@@ -225,7 +236,7 @@ export function SlidePanel({ className }: SlidePanelProps) {
             /* ── Resolution mode: existing ticket ────────────── */
             <>
               <p className="slide-panel-email">
-                {ticket.customer_email ?? 'Anonymous'}
+                {ticket.customer_email ?? "Anonymous"}
               </p>
 
               <div className="slide-panel-badges">
@@ -263,9 +274,9 @@ export function SlidePanel({ className }: SlidePanelProps) {
                 size="lg"
                 leftIcon={<Copy size={16} />}
                 onClick={handleCopy}
-                style={{ width: '100%' }}
+                style={{ width: "100%" }}
               >
-                {copied ? 'Copied!' : 'Copy Reply'}
+                {copied ? "Copied!" : "Copy Reply"}
               </Button>
 
               <Separator />
@@ -293,7 +304,9 @@ export function SlidePanel({ className }: SlidePanelProps) {
               <div className="slide-panel-create-header">
                 <MessageSquare size={24} className="slide-panel-create-icon" />
                 <div>
-                  <p className="slide-panel-create-title">Process New Message</p>
+                  <p className="slide-panel-create-title">
+                    Process New Message
+                  </p>
                   <p className="slide-panel-create-subtitle">
                     Paste a customer message below and run AI analysis
                   </p>
@@ -311,7 +324,10 @@ export function SlidePanel({ className }: SlidePanelProps) {
               />
 
               <div>
-                <label htmlFor="create-message" className="slide-panel-section-label">
+                <label
+                  htmlFor="create-message"
+                  className="slide-panel-section-label"
+                >
                   Customer Message
                 </label>
                 <textarea
@@ -333,19 +349,31 @@ export function SlidePanel({ className }: SlidePanelProps) {
               <Button
                 variant="primary"
                 size="lg"
-                leftIcon={isAnalysing ? <Loader2 size={16} className="animate-spin" /> : <Sparkles size={16} />}
+                leftIcon={
+                  isAnalysing ? (
+                    <Loader2 size={16} className="animate-spin" />
+                  ) : (
+                    <Sparkles size={16} />
+                  )
+                }
                 onClick={handleRunAnalysis}
                 disabled={!createMessage.trim() || isAnalysing}
-                style={{ width: '100%' }}
+                style={{ width: "100%" }}
               >
-                {isAnalysing ? 'Analysing…' : 'Run AI Analysis'}
+                {isAnalysing ? "Analysing…" : "Run AI Analysis"}
               </Button>
             </div>
           ) : (
             /* ── Fallback empty state (shouldn't normally appear) */
             <div className="slide-panel-empty">
               <MessageSquare size={48} className="slide-panel-empty-icon" />
-              <p style={{ fontSize: 'var(--text-lg)', fontWeight: 'var(--font-weight-semibold)', color: 'var(--color-text-primary)' }}>
+              <p
+                style={{
+                  fontSize: "var(--text-lg)",
+                  fontWeight: "var(--font-weight-semibold)",
+                  color: "var(--color-text-primary)",
+                }}
+              >
                 No ticket selected
               </p>
             </div>
@@ -353,5 +381,5 @@ export function SlidePanel({ className }: SlidePanelProps) {
         </div>
       </aside>
     </>
-  )
+  );
 }

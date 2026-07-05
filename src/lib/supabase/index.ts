@@ -5,4 +5,4 @@
  * Import from '@/lib/supabase' anywhere in the app.
  */
 
-export { supabase } from './client'
+export { supabase } from "./client";

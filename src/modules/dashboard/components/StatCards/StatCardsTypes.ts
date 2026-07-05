@@ -1,3 +1,3 @@
 export interface StatCardsProps {
-  className?: string
+  className?: string;
 }

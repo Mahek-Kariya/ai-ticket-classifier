@@ -1,3 +1,3 @@
 export interface HeroBannerProps {
-  className?: string
+  className?: string;
 }

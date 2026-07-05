@@ -1,7 +1,25 @@
-import { createGroq } from '@ai-sdk/groq'
-import { generateText } from 'ai'
+/**
+ * systemPrompts.ts
+ *
+ * Central repository for AI system prompts utilized in the dashboard module.
+ * Prompts are encapsulated inside builder functions rather than raw exported
+ * constants. This ensures scalability, allowing dynamic parameters (like business
+ * context or custom rules) to be passed into prompts in future phases.
+ *
+ * Structure guidelines:
+ * - Define system prompts inside named builder functions (e.g. getClassificationPrompt()).
+ * - Keep prompts highly descriptive to handle complex support ticket domains.
+ * - Future builders (e.g. getReplyGenerationPrompt(), getSummaryPrompt()) should
+ *   be added here as the application expands.
+ */
 
-const CLASSIFICATION_SYSTEM_PROMPT = `You are an expert AI customer support assistant.
+/**
+ * Returns the system prompt used by the AI classifier.
+ * Directs the LLM to output a precise, valid JSON object with category,
+ * urgency, and a professional draft reply.
+ */
+export function getClassificationPrompt(): string {
+  return `You are an expert AI customer support assistant.
 Your job is to analyze an incoming customer support message and classify it with 100% precision.
 
 You must output a single, valid JSON object and absolutely nothing else.
@@ -33,36 +51,5 @@ Example output:
   "category": "technical",
   "urgency": "medium",
   "ai_draft_reply": "Hello, thank you for reporting this issue. We apologize for the inconvenience caused by the app loading error. Our engineering team is currently investigating, and we will update you as soon as we have a resolution. If you have any further details to share, please let us know."
-}`
-
-/**
- * Generates classification and draft reply text for a customer message.
- * Calls Groq dynamically based on configured environment variables.
- *
- * @param message The customer support message.
- * @returns The raw string response from the model.
- */
-export async function generateClassification(message: string): Promise<string> {
-  const apiKey = process.env.AI_API_KEY
-  const baseURL = process.env.AI_BASE_URL
-  const modelName = process.env.AI_MODEL
-
-  if (!modelName) {
-    throw new Error('AI_MODEL environment variable is not defined')
-  }
-
-  // Create the Groq provider dynamically using env vars
-  const groq = createGroq({
-    apiKey,
-    baseURL,
-  })
-
-  // Call the text generator
-  const { text } = await generateText({
-    model: groq(modelName),
-    system: CLASSIFICATION_SYSTEM_PROMPT,
-    prompt: message,
-  })
-
-  return text
+}`;
 }
