@@ -20,7 +20,7 @@
  *   6. SlidePanel (conditional overlay from right)
  */
 
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 import { Sparkles, Plus } from "lucide-react";
 import { useAppSelector, useAppDispatch } from "@/store/hooks";
 import {
@@ -49,6 +49,17 @@ export default function DashboardModule() {
   const isPanelOpen = useAppSelector((state) => state.tickets.isPanelOpen);
   const isLoading = useAppSelector((state) => state.tickets.isLoading);
   const loadError = useAppSelector((state) => state.tickets.error);
+  const tickets = useAppSelector((state) => state.tickets.items);
+
+  // Count tickets where created_at is within the last 60 minutes
+  const newTicketsLastHour = useMemo(() => {
+    // eslint-disable-next-line react-hooks/purity
+    const oneHourAgo = Date.now() - 60 * 60 * 1000;
+    return tickets.filter((ticket) => {
+      const createdAtTime = new Date(ticket.created_at).getTime();
+      return createdAtTime >= oneHourAgo;
+    }).length;
+  }, [tickets]);
 
   // ── Hydrate tickets from API on mount ─────────────────────
   useEffect(() => {
@@ -201,7 +212,7 @@ export default function DashboardModule() {
       </header>
 
       {/* ── 2. Hero Banner ──────────────────────────────────────── */}
-      <HeroBanner />
+      <HeroBanner newTicketsLastHour={newTicketsLastHour} />
 
       {/* ── 3. Stat Cards (overlap hero by -40px via CSS) ───────── */}
       <StatCards />

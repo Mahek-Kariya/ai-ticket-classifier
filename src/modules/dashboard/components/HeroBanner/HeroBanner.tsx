@@ -3,7 +3,7 @@ import { HeroLiveCard } from "@/components/base";
 import "./HeroBanner.css";
 import type { HeroBannerProps } from "./HeroBannerTypes";
 
-export function HeroBanner({ className }: HeroBannerProps) {
+export function HeroBanner({ newTicketsLastHour, className }: HeroBannerProps) {
   return (
     <section className={cn("hero-banner", className)}>
       <div className="hero-banner-content">
@@ -16,7 +16,7 @@ export function HeroBanner({ className }: HeroBannerProps) {
           </p>
         </div>
 
-        <HeroLiveCard count={3} />
+        <HeroLiveCard count={newTicketsLastHour} />
       </div>
     </section>
   );
