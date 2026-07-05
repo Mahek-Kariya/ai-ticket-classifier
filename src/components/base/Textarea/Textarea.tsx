@@ -1,16 +1,16 @@
-import { Textarea as ShadTextarea } from '@/components/ui/textarea'
-import { cn } from '@/lib/utils'
-import './Textarea.css'
-import type { BaseTextareaProps, TextareaVariant } from './TextareaTypes'
+import { Textarea as ShadTextarea } from "@/components/ui/textarea";
+import { cn } from "@/lib/utils";
+import "./Textarea.css";
+import type { TextareaProps, TextareaVariant } from "./TextareaTypes";
 
 const variantClass: Record<TextareaVariant, string> = {
-  'default':  'textarea-default',
-  'inset':    'textarea-inset',
-  'ai-reply': 'textarea-ai-reply',
-}
+  default: "textarea-default",
+  inset: "textarea-inset",
+  "ai-reply": "textarea-ai-reply",
+};
 
 export function Textarea({
-  variant = 'default',
+  variant = "default",
   label,
   hint,
   error,
@@ -19,9 +19,9 @@ export function Textarea({
   id,
   style,
   ...props
-}: BaseTextareaProps) {
+}: TextareaProps) {
   return (
-    <div style={{ width: '100%' }}>
+    <div style={{ width: "100%" }}>
       {label && (
         <label htmlFor={id} className="textarea-label">
           {label}
@@ -30,14 +30,18 @@ export function Textarea({
 
       <ShadTextarea
         id={id}
-        className={cn('textarea-base', variantClass[variant], className)}
+        className={cn("textarea-base", variantClass[variant], className)}
         rows={minRows}
         style={style}
         {...props}
       />
 
-      {error  && <p className="textarea-error-text" role="alert">{error}</p>}
+      {error && (
+        <p className="textarea-error-text" role="alert">
+          {error}
+        </p>
+      )}
       {!error && hint && <p className="textarea-hint">{hint}</p>}
     </div>
-  )
+  );
 }

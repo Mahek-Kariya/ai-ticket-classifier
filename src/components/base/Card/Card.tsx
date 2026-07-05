@@ -1,7 +1,16 @@
-import { Card as ShadCard } from '@/components/ui/card'
-import { cn } from '@/lib/utils'
-import './Card.css'
-import type { StatCardProps, HeroLiveCardProps, PanelSectionCardProps } from './CardTypes'
+/**
+ * NOTE: Architecture Rule Exception
+ * These Card variants (StatCard, HeroLiveCard, PanelSectionCard) are tightly
+ * related and intentionally co-located in this file for simplicity and ease of use.
+ */
+import { Card as ShadCard } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
+import "./Card.css";
+import type {
+  StatCardProps,
+  HeroLiveCardProps,
+  PanelSectionCardProps,
+} from "./CardTypes";
 
 export function StatCard({
   icon,
@@ -12,7 +21,7 @@ export function StatCard({
   className,
 }: StatCardProps) {
   return (
-    <ShadCard className={cn('card-stat', className)}>
+    <ShadCard className={cn("card-stat", className)}>
       <span className="card-stat-icon" aria-hidden="true">
         {icon}
       </span>
@@ -29,12 +38,12 @@ export function StatCard({
         </p>
       )}
     </ShadCard>
-  )
+  );
 }
 
 export function HeroLiveCard({ count, className }: HeroLiveCardProps) {
   return (
-    <div className={cn('card-hero-live', className)}>
+    <div className={cn("card-hero-live", className)}>
       <div className="card-hero-live-indicator">
         <span
           className="card-hero-live-dot animate-pulse-dot"
@@ -44,11 +53,11 @@ export function HeroLiveCard({ count, className }: HeroLiveCardProps) {
       </div>
 
       <p className="card-hero-live-count">
-        {count} new ticket{count !== 1 ? 's' : ''}
+        {count} new ticket{count !== 1 ? "s" : ""}
       </p>
       <p className="card-hero-live-sub">in the last hour</p>
     </div>
-  )
+  );
 }
 
 export function PanelSectionCard({
@@ -57,9 +66,9 @@ export function PanelSectionCard({
   className,
 }: PanelSectionCardProps) {
   return (
-    <div className={cn('card-panel-section', className)}>
+    <div className={cn("card-panel-section", className)}>
       <p className="card-panel-section-title label-caps">{title}</p>
       {children}
     </div>
-  )
+  );
 }

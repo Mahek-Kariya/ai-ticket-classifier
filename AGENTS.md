@@ -39,18 +39,18 @@ No live AI or database wiring yet. See Section 8 for the full roadmap.
 
 ## 2. Tech Stack
 
-| Layer             | Technology                      | Notes                                                                                                      |
-|-------------------|---------------------------------|------------------------------------------------------------------------------------------------------------|
-| Framework         | Next.js 16 (App Router)         | TypeScript, no Pages Router                                                                                |
-| Styling           | Tailwind CSS v4                 | Tokens defined via `@theme` in CSS, not `tailwind.config.ts`                                               |
-| Component base    | shadcn/ui                       | Never edit `components/ui/*` directly — wrap it                                                            |
-| AI / streaming    | Vercel AI SDK v6 (`ai` package) |                                                                                                            |
-| AI provider       | Groq (`@ai-sdk/groq`)           | Model: `llama3-8b-8192`. Abstracted behind `agentClient.ts` so swapping providers later is a 3-line change |
-| Database          | Supabase (PostgreSQL)           | Single `tickets` table, no auth yet                                                                        |
-| State management  | Redux Toolkit + react-redux     | Global store for tickets, filters, and slide panel state. See Section 3a                                   |
-| Icons             | lucide-react                    | Only icon library used                                                                                     |
-| Package manager   | npm                             | Not yarn or pnpm                                                                                           |
-| Deployment target | Vercel                          | Frontend only — Supabase and Groq are external services                                                    |
+| Layer             | Technology                      | Notes                                                                                                          |
+| ----------------- | ------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| Framework         | Next.js 16 (App Router)         | TypeScript, no Pages Router                                                                                    |
+| Styling           | Tailwind CSS v4                 | Tokens defined via `@theme` in CSS, not `tailwind.config.ts`                                                   |
+| Component base    | shadcn/ui                       | Never edit `components/ui/*` directly — wrap it                                                                |
+| AI / streaming    | Vercel AI SDK v6 (`ai` package) |                                                                                                                |
+| AI provider       | Groq (`@ai-sdk/groq`)           | Model: `openai/gpt-oss-20b`. Abstracted behind `agentClient.ts` so swapping providers later is a 3-line change |
+| Database          | Supabase (PostgreSQL)           | Single `tickets` table, no auth yet                                                                            |
+| State management  | Redux Toolkit + react-redux     | Global store for tickets, filters, and slide panel state. See Section 3a                                       |
+| Icons             | lucide-react                    | Only icon library used                                                                                         |
+| Package manager   | npm                             | Not yarn or pnpm                                                                                               |
+| Deployment target | Vercel                          | Frontend only — Supabase and Groq are external services                                                        |
 
 **Explicitly NOT used:** Zustand, Jotai, Recoil, MUI, Chakra UI,
 Headless UI, `@ai-sdk/openai` (use `@ai-sdk/groq` instead). Redux Toolkit
@@ -83,7 +83,7 @@ src/
 │       ├── components/               Dashboard-only UI (StatCards, TicketLedger, SlidePanel)
 │       ├── services/                 Dashboard-only API calls (fetchTickets, updateStatus)
 │       ├── utils/                    Dashboard-only helpers (formatRelativeTime, getUrgencyColor)
-│       ├── lib/                      Dashboard-only third-party config, mock-data.ts
+│       ├── lib/                      Dashboard-only config, mock-data.ts, agentClient.ts, systemPrompts.ts
 │       └── DashboardModule.tsx       Single entry point — wires everything together
 │
 ├── components/
@@ -104,8 +104,6 @@ src/
 ├── types/
 │   └── index.ts                      Already exists — Ticket, TicketCategory,
 │                                      TicketUrgency, TicketStatus, etc.
-├── utils/
-│   └── agentClient.ts                AI provider wrapper (Groq today, swappable later)
 └── styles/
     ├── globals.css                   Entry point — imports order matters, see file
     ├── variables.css                 ALL CSS custom properties + Tailwind @theme
@@ -164,7 +162,7 @@ Status badges:
 ### Typography
 
 - **Inter** for all headings and UI text. Headings use `font-bold
-  tracking-tight` for a crisp, premium Linear/Vercel feel.
+tracking-tight` for a crisp, premium Linear/Vercel feel.
 - **JetBrains Mono** for ticket IDs, timestamps, customer emails, and any
   tabular/technical data. Use the `.font-mono`, `.ticket-id`, `.email-mono`,
   or `.timestamp` utility classes already defined in `typography.css`.
@@ -269,10 +267,10 @@ real component tree. Structure, top to bottom:
 
 3. **Stat cards** (4 cards, white, OVERLAPPING the hero's bottom edge by
    ~40px so they visually float between the hero and the page body):
-    - Total Tickets (violet number, Inbox icon)
-    - Needs Attention (violet number — NOT red, Clock icon)
-    - By Category (2x2 grid of soft pill badges, no big number)
-    - Resolution Rate (green %, progress bar)
+   - Total Tickets (violet number, Inbox icon)
+   - Needs Attention (violet number — NOT red, Clock icon)
+   - By Category (2x2 grid of soft pill badges, no big number)
+   - Resolution Rate (green %, progress bar)
 
 4. **Page action row** — "Support Tickets" heading + subtitle on the left,
    "+ Process New Message" violet solid button on the right.
@@ -345,7 +343,7 @@ CREATE TABLE tickets
     category       ticket_category                                               NOT NULL,
     urgency        ticket_urgency                                                NOT NULL,
     ai_draft_reply TEXT                                                          NOT NULL,
-    ai_model       VARCHAR(100)             DEFAULT 'llama3-8b-8192'             NOT NULL,
+    ai_model       VARCHAR(100)             DEFAULT 'openai/gpt-oss-20b'             NOT NULL,
     status         ticket_status            DEFAULT 'new'                        NOT NULL
 );
 ```
@@ -357,10 +355,10 @@ exactly — keep them in sync if either changes.
 
 ## 10. AI Classification Behaviour (for Phase 4, not yet built)
 
-- All AI calls go through `src/utils/agentClient.ts` — a thin wrapper
+- All AI calls go through `src/modules/dashboard/lib/agentClient.ts` — a thin wrapper
   around the Vercel AI SDK + `@ai-sdk/groq`. No component or service ever
   imports Groq directly.
-- Model: `llama3-8b-8192`, configured via env vars (`AI_BASE_URL`,
+- Model: `openai/gpt-oss-20b`, configured via env vars (`AI_BASE_URL`,
   `AI_MODEL`, `AI_API_KEY`) so switching providers later is a config
   change, not a code change.
 - The system prompt must force strict structured output (category,

@@ -1,2 +1,2 @@
-export { HeroBanner } from './HeroBanner'
-export type { HeroBannerProps } from './HeroBannerTypes'
+export { HeroBanner } from "./HeroBanner";
+export type { HeroBannerProps } from "./HeroBannerTypes";

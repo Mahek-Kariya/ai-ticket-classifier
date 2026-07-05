@@ -1,3 +1,3 @@
 export const statCardsClasses = {
-  grid: 'stat-cards-grid',
-} as const
+  grid: "stat-cards-grid",
+} as const;

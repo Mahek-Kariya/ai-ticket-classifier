@@ -1,3 +1,3 @@
 export interface SlidePanelProps {
-  className?: string
+  className?: string;
 }

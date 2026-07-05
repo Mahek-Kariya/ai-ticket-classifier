@@ -3,55 +3,53 @@
  *
  * Next.js App Router handler for a single ticket identified by
  * its UUID path parameter.
+ * Thin controller delegating to ticketDbService.
  *
  * PATCH → Update mutable fields (currently just `status`) on an
  *         existing ticket row and return the modified record.
  */
 
-import { NextResponse } from 'next/server'
-import { supabase } from '@/lib/supabase'
-import type { ApiResponse, Ticket, TicketStatus } from '@/types'
-
-// ── Allowed status values for validation ─────────────────────
+import { NextResponse } from "next/server";
+import { supabase } from "@/lib/supabase";
+import { updateTicketStatusInDb } from "@/services/ticketDbService";
+import type { ApiResponse, Ticket, TicketStatus } from "@/types";
 
 const VALID_STATUSES: ReadonlySet<TicketStatus> = new Set([
-  'new',
-  'in_progress',
-  'resolved',
-])
-
-// ── PATCH /api/tickets/[id] ──────────────────────────────────
-// Reads the ticket UUID from the dynamic route segment.
-// Accepts a JSON body with `{ status: TicketStatus }`.
-// Runs an UPDATE against the Supabase tickets table, sets
-// `updated_at` to now(), and returns the patched row.
+  "new",
+  "in_progress",
+  "resolved",
+]);
 
 interface PatchTicketBody {
-  status: TicketStatus
+  status: TicketStatus;
 }
 
 export async function PATCH(
   request: Request,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ): Promise<NextResponse<ApiResponse<Ticket>>> {
-  const { id } = await params
+  const { id } = await params;
 
   if (!supabase) {
     return NextResponse.json(
-      { data: null, error: 'Supabase client is not configured. Check your environment variables.' },
-      { status: 503 }
-    )
+      {
+        data: null,
+        error:
+          "Supabase client is not configured. Check your environment variables.",
+      },
+      { status: 503 },
+    );
   }
 
-  let body: PatchTicketBody
+  let body: PatchTicketBody;
 
   try {
-    body = (await request.json()) as PatchTicketBody
+    body = (await request.json()) as PatchTicketBody;
   } catch {
     return NextResponse.json(
-      { data: null, error: 'Invalid JSON in request body.' },
-      { status: 400 }
-    )
+      { data: null, error: "Invalid JSON in request body." },
+      { status: 400 },
+    );
   }
 
   // Validate the incoming status value
@@ -59,38 +57,26 @@ export async function PATCH(
     return NextResponse.json(
       {
         data: null,
-        error: `Invalid status value. Must be one of: ${[...VALID_STATUSES].join(', ')}.`,
+        error: `Invalid status value. Must be one of: ${[...VALID_STATUSES].join(", ")}.`,
       },
-      { status: 400 }
-    )
+      { status: 400 },
+    );
   }
 
-  const { data, error } = await supabase
-    .from('tickets')
-    .update({
-      status: body.status,
-      updated_at: new Date().toISOString(),
-    })
-    .eq('id', id)
-    .select()
-    .single()
-
-  if (error) {
+  try {
+    const updatedTicket = await updateTicketStatusInDb(id, body.status);
     return NextResponse.json(
-      { data: null, error: error.message },
-      { status: 500 }
-    )
-  }
-
-  if (!data) {
+      { data: updatedTicket, error: null },
+      { status: 200 },
+    );
+  } catch (error: unknown) {
+    const errMessage =
+      error instanceof Error ? error.message : "Failed to update ticket status.";
+    // Map not found error to 404
+    const status = errMessage.includes("No ticket found") ? 404 : 500;
     return NextResponse.json(
-      { data: null, error: `No ticket found with id "${id}".` },
-      { status: 404 }
-    )
+      { data: null, error: errMessage },
+      { status },
+    );
   }
-
-  return NextResponse.json(
-    { data: data as Ticket, error: null },
-    { status: 200 }
-  )
 }

@@ -22,7 +22,7 @@ import type {
 
 interface TicketsState {
   items: Ticket[];
-  loading: boolean;
+  isLoading: boolean;
   error: string | null;
   filters: TicketFilters;
   selectedTicketId: string | null;
@@ -31,7 +31,7 @@ interface TicketsState {
 
 const initialState: TicketsState = {
   items: [],
-  loading: true,
+  isLoading: true,
   error: null,
   filters: {
     category: "all",
@@ -55,7 +55,7 @@ const ticketsSlice = createSlice({
       state.items = action.payload;
     },
     setLoading(state, action: PayloadAction<boolean>) {
-      state.loading = action.payload;
+      state.isLoading = action.payload;
     },
     setError(state, action: PayloadAction<string | null>) {
       state.error = action.payload;
@@ -81,7 +81,7 @@ const ticketsSlice = createSlice({
     },
     updateTicketStatus(
       state,
-      action: PayloadAction<{ id: string; status: TicketStatus }>
+      action: PayloadAction<{ id: string; status: TicketStatus }>,
     ) {
       const ticket = state.items.find((t) => t.id === action.payload.id);
       if (ticket) {

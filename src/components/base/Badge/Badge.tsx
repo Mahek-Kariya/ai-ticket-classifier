@@ -1,3 +1,8 @@
+/**
+ * NOTE: Architecture Rule Exception
+ * These Badge variants (CategoryBadge, UrgencyBadge, StatusBadge) are tightly
+ * related and intentionally co-located in this file for simplicity and ease of use.
+ */
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import "./Badge.css";

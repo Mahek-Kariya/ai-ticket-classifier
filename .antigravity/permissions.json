@@ -1,0 +1,15 @@
+{
+  "rules": [
+    {
+      "effect": "deny",
+      "action": "read",
+      "resource": ".env.local"
+    },
+    {
+      "effect": "deny",
+      "action": "read",
+      "resource": ".env*.local"
+    }
+  ],
+  What is the exact function name handling AI analysis
+  in the SlidePanel component?

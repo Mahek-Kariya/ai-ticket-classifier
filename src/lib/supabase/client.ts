@@ -11,33 +11,37 @@
  * instead of crashing on import.
  */
 
-import { createClient, type SupabaseClient } from '@supabase/supabase-js'
+import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 
 // ── Environment variable validation ─────────────────────────
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
 function isMissing(val: string | undefined): val is undefined {
-  return !val || val === 'your_supabase_project_url' || val === 'your_supabase_anon_key'
+  return (
+    !val ||
+    val === "your_supabase_project_url" ||
+    val === "your_supabase_anon_key"
+  );
 }
 
 // ── Client instantiation ────────────────────────────────────
 
-let supabase: SupabaseClient | null = null
+let supabase: SupabaseClient | null = null;
 
 if (isMissing(supabaseUrl) || isMissing(supabaseAnonKey)) {
-  if (typeof window !== 'undefined') {
+  if (typeof window !== "undefined") {
     // Only warn in the browser — server-side renders during build
     // may legitimately lack env vars.
     console.warn(
-      '[supabase/client] NEXT_PUBLIC_SUPABASE_URL or NEXT_PUBLIC_SUPABASE_ANON_KEY ' +
-        'is missing or still set to the placeholder value. ' +
-        'Database features will be unavailable until valid credentials are provided in .env.local.'
-    )
+      "[supabase/client] NEXT_PUBLIC_SUPABASE_URL or NEXT_PUBLIC_SUPABASE_ANON_KEY " +
+        "is missing or still set to the placeholder value. " +
+        "Database features will be unavailable until valid credentials are provided in .env.local.",
+    );
   }
 } else {
-  supabase = createClient(supabaseUrl, supabaseAnonKey)
+  supabase = createClient(supabaseUrl, supabaseAnonKey);
 }
 
-export { supabase }
+export { supabase };

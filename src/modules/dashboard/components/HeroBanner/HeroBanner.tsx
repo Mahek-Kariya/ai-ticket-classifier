@@ -1,11 +1,11 @@
-import { cn } from '@/lib/utils'
-import { HeroLiveCard } from '@/components/base'
-import './HeroBanner.css'
-import type { HeroBannerProps } from './HeroBannerTypes'
+import { cn } from "@/lib/utils";
+import { HeroLiveCard } from "@/components/base";
+import "./HeroBanner.css";
+import type { HeroBannerProps } from "./HeroBannerTypes";
 
 export function HeroBanner({ className }: HeroBannerProps) {
   return (
-    <section className={cn('hero-banner', className)}>
+    <section className={cn("hero-banner", className)}>
       <div className="hero-banner-content">
         <div className="hero-banner-text">
           <span className="hero-banner-label">AI-Powered Support</span>
@@ -19,5 +19,5 @@ export function HeroBanner({ className }: HeroBannerProps) {
         <HeroLiveCard count={3} />
       </div>
     </section>
-  )
+  );
 }
