@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { X, Sparkles, Copy, MessageSquare, Loader2 } from 'lucide-react'
 import { useAppSelector, useAppDispatch } from '@/store/hooks'
-import { closePanel, updateTicketStatus, addTicket } from '@/store/ticketsSlice'
+import { closePanel, updateTicketStatus, addTicket, openPanel } from '@/store/ticketsSlice'
 import {
   Button,
   Input,
@@ -19,7 +19,7 @@ import {
 } from '@/modules/dashboard/services/ticketService'
 import './SlidePanel.css'
 import type { SlidePanelProps } from './SlidePanelTypes'
-import type { Ticket, TicketCategory, TicketUrgency, TicketStatus } from '@/types'
+import type { Ticket, TicketCategory, TicketUrgency, TicketStatus, ApiResponse } from '@/types'
 
 // ── Constants ────────────────────────────────────────────────
 const STATUS_OPTIONS: Array<{ value: TicketStatus; label: string }> = [
@@ -80,6 +80,7 @@ export function SlidePanel({ className }: SlidePanelProps) {
   const [createEmail, setCreateEmail] = useState('')
   const [createMessage, setCreateMessage] = useState('')
   const [isAnalysing, setIsAnalysing] = useState(false)
+  const [analysisError, setAnalysisError] = useState<string | null>(null)
 
   // ── Auto-status transition: new → in_progress ─────────────
   // Fires the remote PATCH first, then updates Redux on success.
@@ -110,6 +111,7 @@ export function SlidePanel({ className }: SlidePanelProps) {
       setCreateEmail('')
       setCreateMessage('')
       setIsAnalysing(false)
+      setAnalysisError(null)
     }
   }, [isCreateMode])
 
@@ -179,46 +181,42 @@ export function SlidePanel({ className }: SlidePanelProps) {
     if (!createMessage.trim()) return
 
     setIsAnalysing(true)
-
-    // Simulate a brief AI processing delay for UX
-    await new Promise((resolve) => setTimeout(resolve, 500))
-
-    const category = pickRandom(CATEGORIES)
-    const urgency = pickRandom(URGENCIES)
-    const draftReplyText = generateMockDraftReply(category, urgency)
+    setAnalysisError(null)
 
     try {
-      // Attempt live server insertion
-      const serverTicket = await createRemoteTicket({
-        customer_email: createEmail.trim() || null,
-        message_body: createMessage.trim(),
-        category,
-        urgency,
-        ai_draft_reply: draftReplyText,
-        ai_model: 'llama3-8b-8192',
+      const response = await fetch('/api/classify', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          message: createMessage.trim(),
+          customer_email: createEmail.trim() || undefined,
+        }),
       })
 
-      dispatch(addTicket(serverTicket))
-    } catch {
-      // Fallback: server unavailable — create a client-side ticket
-      const now = new Date().toISOString()
-      const fallbackTicket: Ticket = {
-        id: crypto.randomUUID(),
-        created_at: now,
-        updated_at: now,
-        customer_email: createEmail.trim() || null,
-        message_body: createMessage.trim(),
-        category,
-        urgency,
-        ai_draft_reply: draftReplyText,
-        ai_model: 'llama3-8b-8192',
-        status: 'new',
+      if (!response.ok) {
+        const errData = await response.json().catch(() => null)
+        throw new Error(errData?.error || `Server returned status ${response.status}`)
       }
 
-      dispatch(addTicket(fallbackTicket))
+      const result: ApiResponse<Ticket> = await response.json()
+      if (result.error || !result.data) {
+        throw new Error(result.error || 'Failed to classify message.')
+      }
+
+      const serverTicket = result.data
+
+      // Add to Redux store so the dashboard updates
+      dispatch(addTicket(serverTicket))
+      
+      // Transition slide panel to show the newly created ticket
+      dispatch(openPanel(serverTicket.id))
+    } catch (err: any) {
+      console.error('AI Analysis failed:', err)
+      setAnalysisError(err.message || 'An unexpected error occurred during analysis.')
     } finally {
       setIsAnalysing(false)
-      dispatch(closePanel())
     }
   }, [createEmail, createMessage, dispatch])
 
@@ -353,6 +351,12 @@ export function SlidePanel({ className }: SlidePanelProps) {
                   rows={6}
                 />
               </div>
+
+              {analysisError && (
+                <div className="p-3 text-xs rounded-md bg-urgency-high-bg text-urgency-high-text border border-urgency-high-text/20">
+                  {analysisError}
+                </div>
+              )}
 
               <Button
                 variant="primary"
