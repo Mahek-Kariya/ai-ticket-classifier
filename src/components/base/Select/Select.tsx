@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import "./Select.css";
-import type { BaseSelectProps } from "./SelectTypes";
+import type { SelectProps } from "./SelectTypes";
 
 export function Select({
   options,
@@ -17,7 +17,7 @@ export function Select({
   onValueChange,
   placeholder = "Select…",
   className,
-}: BaseSelectProps) {
+}: SelectProps) {
   return (
     <ShadSelect value={value} onValueChange={onValueChange}>
       <SelectTrigger className={cn("select-trigger", className)}>

@@ -3,7 +3,7 @@ export interface SelectOption {
   label: string;
 }
 
-export interface BaseSelectProps {
+export interface SelectProps {
   options: SelectOption[];
   value: string;
   onValueChange: (value: string) => void;

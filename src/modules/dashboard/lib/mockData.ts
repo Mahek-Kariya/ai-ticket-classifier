@@ -1,5 +1,5 @@
 /**
- * mock-data.ts
+ * mockData.ts
  *
  * Realistic mock dataset for the dashboard UI (Phase 1).
  * Each ticket mirrors the Supabase `tickets` table schema exactly.

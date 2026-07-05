@@ -5,6 +5,7 @@ import { Inbox, Clock, LayoutGrid, CheckCircle } from "lucide-react";
 import { useAppSelector } from "@/store/hooks";
 import { StatCard } from "@/components/base";
 import { cn } from "@/lib/utils";
+import { calculateStats } from "../../utils/calculateStats";
 import "./StatCards.css";
 import type { StatCardsProps } from "./StatCardsTypes";
 import type { TicketCategory } from "@/types";
@@ -45,31 +46,7 @@ const CATEGORY_COLORS: Record<
 export function StatCards({ className }: StatCardsProps) {
   const tickets = useAppSelector((state) => state.tickets.items);
 
-  const stats = useMemo(() => {
-    const total = tickets.length;
-    const now = new Date();
-    const todayStart = new Date(
-      now.getFullYear(),
-      now.getMonth(),
-      now.getDate(),
-    );
-    const newToday = tickets.filter(
-      (t) => new Date(t.created_at) >= todayStart,
-    ).length;
-    const highUrgency = tickets.filter(
-      (t) => t.urgency === "high" && t.status !== "resolved",
-    ).length;
-    const resolved = tickets.filter((t) => t.status === "resolved").length;
-    const resolutionRate = total > 0 ? Math.round((resolved / total) * 100) : 0;
-    const byCategory = CATEGORY_ORDER.reduce(
-      (acc, cat) => {
-        acc[cat] = tickets.filter((t) => t.category === cat).length;
-        return acc;
-      },
-      {} as Record<TicketCategory, number>,
-    );
-    return { total, newToday, highUrgency, resolutionRate, byCategory };
-  }, [tickets]);
+  const stats = useMemo(() => calculateStats(tickets), [tickets]);
 
   return (
     <div className={cn("stat-cards-grid stagger-children", className)}>

@@ -2,24 +2,25 @@
  * api/tickets/route.ts
  *
  * Next.js App Router handler for the base /api/tickets endpoint.
+ * Thin controller delegating to ticketDbService.
  *
  * GET  → Fetch all tickets from Supabase (or mock fallback).
  * POST → Insert a new ticket record into the tickets table.
- *
- * All responses conform to the ApiResponse<T> contract defined in
- * src/types/index.ts so consumers never need to guess the shape.
  */
 
 import { NextResponse } from "next/server";
 import { supabase } from "@/lib/supabase";
-import { MOCK_TICKETS } from "@/modules/dashboard/lib/mock-data";
+import { MOCK_TICKETS } from "@/modules/dashboard/lib/mockData";
+import {
+  getTicketsFromDb,
+  createTicketInDb,
+} from "@/services/ticketDbService";
 import type { ApiResponse, Ticket } from "@/types";
 
 // ── GET /api/tickets ─────────────────────────────────────────
 // Returns every ticket, newest first.
 // Falls back to the static MOCK_TICKETS collection when the
 // Supabase client is unavailable (missing env vars / offline).
-
 export async function GET(): Promise<NextResponse<ApiResponse<Ticket[]>>> {
   if (!supabase) {
     return NextResponse.json(
@@ -28,30 +29,24 @@ export async function GET(): Promise<NextResponse<ApiResponse<Ticket[]>>> {
     );
   }
 
-  const { data, error } = await supabase
-    .from("tickets")
-    .select("*")
-    .order("created_at", { ascending: false });
-
-  if (error) {
+  try {
+    const tickets = await getTicketsFromDb();
     return NextResponse.json(
-      { data: null, error: error.message },
+      { data: tickets, error: null },
+      { status: 200 },
+    );
+  } catch (error: unknown) {
+    const errMessage =
+      error instanceof Error ? error.message : "Failed to fetch tickets.";
+    return NextResponse.json(
+      { data: null, error: errMessage },
       { status: 500 },
     );
   }
-
-  return NextResponse.json(
-    { data: data as Ticket[], error: null },
-    { status: 200 },
-  );
 }
 
 // ── POST /api/tickets ────────────────────────────────────────
 // Inserts a new ticket and returns the created row.
-// Expects a JSON body with the required ticket fields:
-//   { customer_email?, message_body, category, urgency,
-//     ai_draft_reply, ai_model }
-
 interface CreateTicketBody {
   customer_email?: string | null;
   message_body: string;
@@ -94,29 +89,26 @@ export async function POST(
     );
   }
 
-  const { data, error } = await supabase
-    .from("tickets")
-    .insert({
+  try {
+    const createdTicket = await createTicketInDb({
       customer_email: body.customer_email ?? null,
       message_body: body.message_body,
       category: body.category,
       urgency: body.urgency,
       ai_draft_reply: body.ai_draft_reply,
       ai_model: body.ai_model,
-      status: "new" as const,
-    })
-    .select()
-    .single();
+    });
 
-  if (error) {
     return NextResponse.json(
-      { data: null, error: error.message },
+      { data: createdTicket, error: null },
+      { status: 201 },
+    );
+  } catch (error: unknown) {
+    const errMessage =
+      error instanceof Error ? error.message : "Failed to create ticket.";
+    return NextResponse.json(
+      { data: null, error: errMessage },
       { status: 500 },
     );
   }
-
-  return NextResponse.json(
-    { data: data as Ticket, error: null },
-    { status: 201 },
-  );
 }

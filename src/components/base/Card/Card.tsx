@@ -1,3 +1,8 @@
+/**
+ * NOTE: Architecture Rule Exception
+ * These Card variants (StatCard, HeroLiveCard, PanelSectionCard) are tightly
+ * related and intentionally co-located in this file for simplicity and ease of use.
+ */
 import { Card as ShadCard } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import "./Card.css";

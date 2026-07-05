@@ -1,14 +1,6 @@
-"use client";
-
-import { useState, useMemo } from "react";
 import { Search } from "lucide-react";
-import { useAppSelector, useAppDispatch } from "@/store/hooks";
-import {
-  setCategoryFilter,
-  setUrgencyFilter,
-  setSearchFilter,
-  openPanel,
-} from "@/store/ticketsSlice";
+import { useAppDispatch } from "@/store/hooks";
+import { openPanel } from "@/store/ticketsSlice";
 import {
   Button,
   Input,
@@ -18,11 +10,11 @@ import {
   StatusBadge,
 } from "@/components/base";
 import { cn } from "@/lib/utils";
+import { useTicketLedger } from "../../hooks/useTicketLedger";
 import { formatRelativeTime } from "../../utils/formatRelativeTime";
 import "./TicketLedger.css";
-import { TICKETS_PER_PAGE } from "./TicketLedgerStyles";
 import type { TicketLedgerProps } from "./TicketLedgerTypes";
-import type { TicketCategory, TicketUrgency } from "@/types";
+import type { TicketCategory } from "@/types";
 
 const CATEGORY_FILTERS: Array<{
   value: TicketCategory | "all";
@@ -49,54 +41,19 @@ function generateTicketId(index: number, total: number): string {
 
 export function TicketLedger({ className }: TicketLedgerProps) {
   const dispatch = useAppDispatch();
-  const tickets = useAppSelector((state) => state.tickets.items);
-  const filters = useAppSelector((state) => state.tickets.filters);
-  const [currentPage, setCurrentPage] = useState(1);
-
-  const filteredTickets = useMemo(() => {
-    let result = tickets;
-
-    if (filters.category !== "all") {
-      result = result.filter((t) => t.category === filters.category);
-    }
-    if (filters.urgency !== "all") {
-      result = result.filter((t) => t.urgency === filters.urgency);
-    }
-    if (filters.search.trim()) {
-      const search = filters.search.toLowerCase();
-      result = result.filter((t) =>
-        t.customer_email?.toLowerCase().includes(search),
-      );
-    }
-
-    return result;
-  }, [tickets, filters]);
-
-  const totalPages = Math.max(
-    1,
-    Math.ceil(filteredTickets.length / TICKETS_PER_PAGE),
-  );
-  const safeCurrentPage = Math.min(currentPage, totalPages);
-  const startIdx = (safeCurrentPage - 1) * TICKETS_PER_PAGE;
-  const paginatedTickets = filteredTickets.slice(
+  const {
+    tickets,
+    filters,
+    currentPage,
+    totalPages,
     startIdx,
-    startIdx + TICKETS_PER_PAGE,
-  );
-
-  function handleCategoryFilter(value: TicketCategory | "all") {
-    dispatch(setCategoryFilter(value));
-    setCurrentPage(1);
-  }
-
-  function handleUrgencyFilter(value: string) {
-    dispatch(setUrgencyFilter(value as TicketUrgency | "all"));
-    setCurrentPage(1);
-  }
-
-  function handleSearch(e: React.ChangeEvent<HTMLInputElement>) {
-    dispatch(setSearchFilter(e.target.value));
-    setCurrentPage(1);
-  }
+    paginatedTickets,
+    filteredTicketsCount,
+    handleCategoryFilter,
+    handleUrgencyFilter,
+    handleSearch,
+    setCurrentPage,
+  } = useTicketLedger();
 
   return (
     <div className={cn("ticket-ledger", className)}>
@@ -194,13 +151,13 @@ export function TicketLedger({ className }: TicketLedgerProps) {
 
       <div className="ticket-ledger-footer">
         <span className="ticket-ledger-footer-count">
-          Showing {paginatedTickets.length} of {filteredTickets.length} tickets
+          Showing {paginatedTickets.length} of {filteredTicketsCount} tickets
         </span>
         <div className="ticket-ledger-footer-nav">
           <Button
             variant="outline"
             size="sm"
-            disabled={safeCurrentPage <= 1}
+            disabled={currentPage <= 1}
             onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
           >
             ← Previous
@@ -208,7 +165,7 @@ export function TicketLedger({ className }: TicketLedgerProps) {
           <Button
             variant="outline"
             size="sm"
-            disabled={safeCurrentPage >= totalPages}
+            disabled={currentPage >= totalPages}
             onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
           >
             Next →

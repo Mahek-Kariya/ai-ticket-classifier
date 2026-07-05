@@ -1,7 +1,7 @@
 import { Input as ShadInput } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import "./Input.css";
-import type { BaseInputProps } from "./InputTypes";
+import type { InputProps } from "./InputTypes";
 
 export function Input({
   leftIcon,
@@ -12,7 +12,7 @@ export function Input({
   className,
   id,
   ...props
-}: BaseInputProps) {
+}: InputProps) {
   return (
     <div className="input-wrapper">
       {label && (

@@ -3,6 +3,7 @@
  *
  * Next.js App Router handler for a single ticket identified by
  * its UUID path parameter.
+ * Thin controller delegating to ticketDbService.
  *
  * PATCH → Update mutable fields (currently just `status`) on an
  *         existing ticket row and return the modified record.
@@ -10,21 +11,14 @@
 
 import { NextResponse } from "next/server";
 import { supabase } from "@/lib/supabase";
+import { updateTicketStatusInDb } from "@/services/ticketDbService";
 import type { ApiResponse, Ticket, TicketStatus } from "@/types";
-
-// ── Allowed status values for validation ─────────────────────
 
 const VALID_STATUSES: ReadonlySet<TicketStatus> = new Set([
   "new",
   "in_progress",
   "resolved",
 ]);
-
-// ── PATCH /api/tickets/[id] ──────────────────────────────────
-// Reads the ticket UUID from the dynamic route segment.
-// Accepts a JSON body with `{ status: TicketStatus }`.
-// Runs an UPDATE against the Supabase tickets table, sets
-// `updated_at` to now(), and returns the patched row.
 
 interface PatchTicketBody {
   status: TicketStatus;
@@ -69,32 +63,20 @@ export async function PATCH(
     );
   }
 
-  const { data, error } = await supabase
-    .from("tickets")
-    .update({
-      status: body.status,
-      updated_at: new Date().toISOString(),
-    })
-    .eq("id", id)
-    .select()
-    .single();
-
-  if (error) {
+  try {
+    const updatedTicket = await updateTicketStatusInDb(id, body.status);
     return NextResponse.json(
-      { data: null, error: error.message },
-      { status: 500 },
+      { data: updatedTicket, error: null },
+      { status: 200 },
+    );
+  } catch (error: unknown) {
+    const errMessage =
+      error instanceof Error ? error.message : "Failed to update ticket status.";
+    // Map not found error to 404
+    const status = errMessage.includes("No ticket found") ? 404 : 500;
+    return NextResponse.json(
+      { data: null, error: errMessage },
+      { status },
     );
   }
-
-  if (!data) {
-    return NextResponse.json(
-      { data: null, error: `No ticket found with id "${id}".` },
-      { status: 404 },
-    );
-  }
-
-  return NextResponse.json(
-    { data: data as Ticket, error: null },
-    { status: 200 },
-  );
 }

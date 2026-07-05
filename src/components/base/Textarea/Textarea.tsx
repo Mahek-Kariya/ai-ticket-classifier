@@ -1,7 +1,7 @@
 import { Textarea as ShadTextarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import "./Textarea.css";
-import type { BaseTextareaProps, TextareaVariant } from "./TextareaTypes";
+import type { TextareaProps, TextareaVariant } from "./TextareaTypes";
 
 const variantClass: Record<TextareaVariant, string> = {
   default: "textarea-default",
@@ -19,7 +19,7 @@ export function Textarea({
   id,
   style,
   ...props
-}: BaseTextareaProps) {
+}: TextareaProps) {
   return (
     <div style={{ width: "100%" }}>
       {label && (

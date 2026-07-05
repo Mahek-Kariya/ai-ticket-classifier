@@ -47,7 +47,7 @@ import { fetchDashboardTickets } from "./services/ticketService";
 export default function DashboardModule() {
   const dispatch = useAppDispatch();
   const isPanelOpen = useAppSelector((state) => state.tickets.isPanelOpen);
-  const isLoading = useAppSelector((state) => state.tickets.loading);
+  const isLoading = useAppSelector((state) => state.tickets.isLoading);
   const loadError = useAppSelector((state) => state.tickets.error);
 
   // ── Hydrate tickets from API on mount ─────────────────────

@@ -1,14 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
 import { X, Sparkles, Copy, MessageSquare, Loader2 } from "lucide-react";
-import { useAppSelector, useAppDispatch } from "@/store/hooks";
-import {
-  closePanel,
-  updateTicketStatus,
-  addTicket,
-  openPanel,
-} from "@/store/ticketsSlice";
 import {
   Button,
   Input,
@@ -18,10 +10,10 @@ import {
   Separator,
 } from "@/components/base";
 import { cn } from "@/lib/utils";
-import { updateRemoteTicketStatus } from "@/modules/dashboard/services/ticketService";
+import { useSlidePanel } from "../../hooks/useSlidePanel";
 import "./SlidePanel.css";
 import type { SlidePanelProps } from "./SlidePanelTypes";
-import type { Ticket, TicketStatus, ApiResponse } from "@/types";
+import type { TicketStatus } from "@/types";
 
 // ── Constants ────────────────────────────────────────────────
 const STATUS_OPTIONS: Array<{ value: TicketStatus; label: string }> = [
@@ -30,178 +22,26 @@ const STATUS_OPTIONS: Array<{ value: TicketStatus; label: string }> = [
   { value: "resolved", label: "Resolved" },
 ];
 
-// ── Component ────────────────────────────────────────────────
-
 export function SlidePanel({ className }: SlidePanelProps) {
-  const dispatch = useAppDispatch();
-  const isPanelOpen = useAppSelector((state) => state.tickets.isPanelOpen);
-  const selectedTicketId = useAppSelector(
-    (state) => state.tickets.selectedTicketId,
-  );
-  const ticket = useAppSelector(
-    (state) =>
-      state.tickets.items.find((t) => t.id === selectedTicketId) ?? null,
-  );
-
-  // Determine if we're in "create" mode (the __new__ sentinel)
-  const isCreateMode = isPanelOpen && selectedTicketId === "__new__";
-
-  // ---- Existing ticket state ----
-  const [draftReply, setDraftReply] = useState("");
-  const [copied, setCopied] = useState(false);
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
-
-  // ---- Creation form state ----
-  const [createEmail, setCreateEmail] = useState("");
-  const [createMessage, setCreateMessage] = useState("");
-  const [isAnalysing, setIsAnalysing] = useState(false);
-  const [analysisError, setAnalysisError] = useState<string | null>(null);
-
-  // ── Auto-status transition: new → in_progress ─────────────
-  // Fires the remote PATCH first, then updates Redux on success.
-  // If the network call fails, the local state still transitions
-  // so the UI isn't blocked — the server will reconcile later.
-  useEffect(() => {
-    if (ticket && ticket.status === "new") {
-      updateRemoteTicketStatus(ticket.id, "in_progress").catch(() => {
-        // Network failure is non-critical here — the optimistic
-        // Redux update below ensures the UI stays responsive.
-      });
-      dispatch(updateTicketStatus({ id: ticket.id, status: "in_progress" }));
-    }
-  }, [ticket, dispatch]);
-
-  // ── Sync draft reply when a ticket is loaded ──────────────
-  useEffect(() => {
-    if (ticket) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setDraftReply(ticket.ai_draft_reply);
-    } else {
-      setDraftReply("");
-    }
-  }, [ticket]);
-
-  // ── Reset creation form when entering create mode ─────────
-  useEffect(() => {
-    if (isCreateMode) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setCreateEmail("");
-      setCreateMessage("");
-      setIsAnalysing(false);
-      setAnalysisError(null);
-    }
-  }, [isCreateMode]);
-
-  // ── Auto-resize AI reply textarea ─────────────────────────
-  useEffect(() => {
-    const el = textareaRef.current;
-    if (!el) return;
-    el.style.height = "auto";
-    el.style.height = `${el.scrollHeight}px`;
-  }, [draftReply]);
-
-  // ── Handlers ──────────────────────────────────────────────
-
-  const handleCopy = useCallback(async () => {
-    try {
-      await navigator.clipboard.writeText(draftReply);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    } catch {
-      const textarea = document.createElement("textarea");
-      textarea.value = draftReply;
-      document.body.appendChild(textarea);
-      textarea.select();
-      document.execCommand("copy");
-      document.body.removeChild(textarea);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    }
-  }, [draftReply]);
-
-  /**
-   * Status toggle handler — fires the remote PATCH, then updates
-   * Redux only on success. Falls back to optimistic local update
-   * if the network call fails so the UI doesn't feel stuck.
-   */
-  const handleStatusChange = useCallback(
-    async (status: TicketStatus) => {
-      if (!ticket) return;
-
-      try {
-        await updateRemoteTicketStatus(ticket.id, status);
-      } catch {
-        // Remote update failed — still apply locally for UX.
-      }
-
-      dispatch(updateTicketStatus({ id: ticket.id, status }));
-    },
-    [dispatch, ticket],
-  );
-
-  const handleClose = useCallback(() => {
-    dispatch(closePanel());
-  }, [dispatch]);
-
-  /**
-   * "Run AI Analysis" handler.
-   *
-   * 1. Generates a mock classification (category, urgency, draft).
-   * 2. Attempts a POST to /api/tickets to persist to the server.
-   * 3. On success, uses the server-returned Ticket (has real UUID
-   *    and timestamps from Supabase).
-   * 4. On failure (Supabase unconfigured / network error), falls
-   *    back to a client-generated Ticket so the UI still works
-   *    with mock data.
-   */
-  const handleRunAnalysis = useCallback(async () => {
-    if (!createMessage.trim()) return;
-
-    setIsAnalysing(true);
-    setAnalysisError(null);
-
-    try {
-      const response = await fetch("/api/classify", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          message: createMessage.trim(),
-          customer_email: createEmail.trim() || undefined,
-        }),
-      });
-
-      if (!response.ok) {
-        const errData = await response.json().catch(() => null);
-        throw new Error(
-          errData?.error || `Server returned status ${response.status}`,
-        );
-      }
-
-      const result: ApiResponse<Ticket> = await response.json();
-      if (result.error || !result.data) {
-        throw new Error(result.error || "Failed to classify message.");
-      }
-
-      const serverTicket = result.data;
-
-      // Add to Redux store so the dashboard updates
-      dispatch(addTicket(serverTicket));
-
-      // Transition slide panel to show the newly created ticket
-      dispatch(openPanel(serverTicket.id));
-    } catch (err: unknown) {
-      console.error("AI Analysis failed:", err);
-      const errMessage =
-        err instanceof Error
-          ? err.message
-          : "An unexpected error occurred during analysis.";
-      setAnalysisError(errMessage);
-    } finally {
-      setIsAnalysing(false);
-    }
-  }, [createEmail, createMessage, dispatch]);
+  const {
+    isPanelOpen,
+    isCreateMode,
+    ticket,
+    draftReply,
+    setDraftReply,
+    copied,
+    textareaRef,
+    createEmail,
+    setCreateEmail,
+    createMessage,
+    setCreateMessage,
+    isAnalysing,
+    analysisError,
+    handleClose,
+    handleCopy,
+    handleStatusChange,
+    handleRunAnalysis,
+  } = useSlidePanel();
 
   if (!isPanelOpen) return null;
 

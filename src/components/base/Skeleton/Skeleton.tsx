@@ -1,3 +1,8 @@
+/**
+ * NOTE: Architecture Rule Exception
+ * These Skeleton variants (Skeleton, SkeletonTableRow, SkeletonStatCard) are tightly
+ * related and intentionally co-located in this file for simplicity and ease of use.
+ */
 import { Skeleton as ShadSkeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import "./Skeleton.css";

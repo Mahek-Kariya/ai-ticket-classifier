@@ -4,7 +4,7 @@ import { Button as ShadButton } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import "./Button.css";
 import { variantClasses, sizeClasses } from "./ButtonStyles";
-import type { BaseButtonProps } from "./ButtonTypes";
+import type { ButtonProps } from "./ButtonTypes";
 
 export function Button({
   variant = "primary",
@@ -17,7 +17,7 @@ export function Button({
   className,
   disabled,
   ...props
-}: BaseButtonProps) {
+}: ButtonProps) {
   return (
     <ShadButton
       className={cn(
