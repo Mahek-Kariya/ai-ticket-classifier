@@ -1,0 +1,93 @@
+/**
+ * globals.css
+ *
+ * Main CSS entry point. Import order matters:
+ *   1. Tailwind v4 (generates utilities from @theme in variables.css)
+ *   2. variables.css  — design tokens + @theme block
+ *   3. typography.css — base element type styles
+ *   4. animations.css — keyframes + animation utilities
+ *
+ * Import this file once in src/app/layout.tsx:
+ *   import '@/styles/globals.css'
+ */
+
+@import "tailwindcss";
+@import "./variables.css";
+@import "./typography.css";
+@import "./animations.css";
+
+/* ============================================================
+   GLOBAL RESETS & BASE
+   ============================================================ */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+
+img,
+video,
+svg {
+  display: block;
+  max-width: 100%;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+  background: none;
+  border: none;
+}
+
+/* Remove list styles only when list has a role attribute */
+[role="list"] {
+  list-style: none;
+}
+
+/* Focus visible — keyboard only */
+:focus-visible {
+  outline: 2px solid var(--color-brand-primary);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* ============================================================
+   SCROLLBAR — violet-tinted, subtle
+   ============================================================ */
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-brand-subtle);
+  border-radius: var(--radius-full);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-brand-light);
+}

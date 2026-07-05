@@ -1,0 +1,181 @@
+/**
+ * DashboardModule.css
+ *
+ * Layout styles for the dashboard shell: top nav, action row,
+ * ledger section, and full-page grid. All colour tokens come
+ * from variables.css — nothing is hardcoded here.
+ */
+
+/* ── Shell ─────────────────────────────────────────────────── */
+
+.dashboard-shell {
+  min-height: 100vh;
+  background-color: var(--color-bg-page);
+  color: var(--color-text-primary);
+  font-family: var(--font-sans);
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── Top Nav ───────────────────────────────────────────────── */
+
+.dashboard-topnav {
+  height: 56px;
+  background-color: var(--color-bg-card);
+  border-bottom: 1px solid var(--color-border-default);
+  position: sticky;
+  top: 0;
+  z-index: var(--z-nav, 40);
+  flex-shrink: 0;
+}
+
+.dashboard-topnav-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 var(--space-8);
+}
+
+.dashboard-topnav-brand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.dashboard-topnav-icon {
+  color: var(--color-brand-primary);
+}
+
+.dashboard-topnav-title {
+  font-size: var(--text-base);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: var(--tracking-tight);
+  color: var(--color-text-primary);
+}
+
+.dashboard-topnav-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-full);
+  background-color: var(--color-border-default);
+  flex-shrink: 0;
+}
+
+/* ── Action Row ────────────────────────────────────────────── */
+
+.dashboard-action-row {
+  max-width: 1400px;
+  width: 100%;
+  margin: 0 auto;
+  padding: var(--space-10) var(--space-12) var(--space-6);
+}
+
+.dashboard-action-row-inner {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-6);
+}
+
+.dashboard-action-heading {
+  font-size: var(--text-2xl);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: var(--tracking-tight);
+  color: var(--color-text-primary);
+  margin: 0;
+  line-height: var(--leading-tight);
+}
+
+.dashboard-action-subtitle {
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+  margin: var(--space-1) 0 0;
+}
+
+/* ── Ledger Section ────────────────────────────────────────── */
+
+.dashboard-ledger-section {
+  max-width: 1400px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 0 var(--space-12) var(--space-12);
+  flex: 1;
+}
+
+/* ── Loading Skeleton Styles ──────────────────────────────── */
+
+.dashboard-loading-hero {
+  background: linear-gradient(135deg, #1e1b4b 0%, #4c1d95 50%, #7c3aed 100%);
+  padding: var(--space-16) var(--space-12) var(--space-20);
+}
+
+.dashboard-loading-hero-inner {
+  max-width: 1400px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.dashboard-loading-hero-title {
+  margin-top: var(--space-2);
+  margin-bottom: var(--space-1);
+}
+
+.dashboard-loading-stats {
+  max-width: 1400px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 0 var(--space-12);
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-6);
+  margin-top: calc(-1 * var(--space-10));
+  position: relative;
+  z-index: 10;
+}
+
+.dashboard-loading-action-sub {
+  margin-top: var(--space-2);
+}
+
+.dashboard-loading-btn {
+  border-radius: var(--radius-lg);
+}
+
+.dashboard-loading-table {
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-2xl);
+  overflow: hidden;
+}
+
+.dashboard-loading-table-header {
+  display: flex;
+  gap: var(--space-2);
+  padding: var(--space-4) var(--space-6);
+  border-bottom: 1px solid var(--color-border-subtle);
+}
+
+.dashboard-loading-pill {
+  border-radius: var(--radius-full);
+}
+
+/* ── Error Banner ─────────────────────────────────────────── */
+
+.dashboard-error-banner {
+  background-color: var(--color-badge-complaint-bg, #fff1f2);
+  border: 1px solid var(--color-badge-complaint-text, #be123c);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4) var(--space-6);
+  margin-bottom: var(--space-4);
+}
+
+.dashboard-error-text {
+  color: var(--color-badge-complaint-text, #be123c);
+  font-size: var(--text-sm);
+  margin: 0;
+}

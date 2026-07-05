@@ -1,0 +1,30 @@
+.stat-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-5);
+  max-width: 1400px;
+  margin: -40px auto 0;
+  padding: 0 var(--space-12);
+  position: relative;
+  z-index: var(--z-raised);
+}
+
+.stat-cards-grid > * {
+  min-height: 160px;
+}
+
+.stat-cards-category-title {
+  font-size: var(--text-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-secondary);
+}
+
+.stat-category-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-full);
+  font-size: var(--text-xs);
+  font-weight: var(--font-weight-medium);
+  white-space: nowrap;
+}
