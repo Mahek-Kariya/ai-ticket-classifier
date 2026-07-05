@@ -15,11 +15,10 @@ import {
 import { cn } from '@/lib/utils'
 import {
   updateRemoteTicketStatus,
-  createRemoteTicket,
 } from '@/modules/dashboard/services/ticketService'
 import './SlidePanel.css'
 import type { SlidePanelProps } from './SlidePanelTypes'
-import type { Ticket, TicketCategory, TicketUrgency, TicketStatus, ApiResponse } from '@/types'
+import type { Ticket, TicketStatus, ApiResponse } from '@/types'
 
 // ── Constants ────────────────────────────────────────────────
 const STATUS_OPTIONS: Array<{ value: TicketStatus; label: string }> = [
@@ -27,36 +26,6 @@ const STATUS_OPTIONS: Array<{ value: TicketStatus; label: string }> = [
   { value: 'in_progress', label: 'In Progress' },
   { value: 'resolved', label: 'Resolved' },
 ]
-
-const CATEGORIES: TicketCategory[] = ['billing', 'technical', 'complaint', 'general']
-const URGENCIES: TicketUrgency[] = ['low', 'medium', 'high']
-
-/** Pick a random element from an array. */
-function pickRandom<T>(arr: readonly T[]): T {
-  return arr[Math.floor(Math.random() * arr.length)]
-}
-
-/** Generate a mock AI draft reply based on the classified category. */
-function generateMockDraftReply(category: TicketCategory, urgency: TicketUrgency): string {
-  const urgencyNote = urgency === 'high'
-    ? 'Given the urgency, our team is prioritising this immediately.'
-    : urgency === 'medium'
-      ? 'We are looking into this and will follow up shortly.'
-      : 'We have logged your enquiry and will respond within our standard timeframe.'
-
-  const categoryReply: Record<TicketCategory, string> = {
-    technical:
-      `Thank you for reaching out. Our engineering team has been notified about this technical issue and is actively investigating.\n\n${urgencyNote}\n\nWe will provide a detailed update within the next few hours. In the meantime, please don't hesitate to share any additional logs or screenshots that might help us diagnose the problem faster.`,
-    billing:
-      `Thank you for contacting us about your billing concern. I've reviewed your account and identified the discrepancy.\n\n${urgencyNote}\n\nWe will process the necessary adjustments and send you a corrected statement within 2–3 business days. Please let us know if you have any further questions.`,
-    complaint:
-      `I sincerely apologise for the experience you've described. Your feedback is extremely important to us and I want to assure you that we take this seriously.\n\n${urgencyNote}\n\nI've escalated this to our customer experience team for a thorough review. You can expect a personal follow-up within 24 hours with our proposed resolution.`,
-    general:
-      `Thank you for reaching out! I'm happy to help with your enquiry.\n\n${urgencyNote}\n\nPlease find the relevant details below and don't hesitate to reach out if you need anything else. We're always here to assist.`,
-  }
-
-  return categoryReply[category]
-}
 
 // ── Component ────────────────────────────────────────────────
 
@@ -99,6 +68,7 @@ export function SlidePanel({ className }: SlidePanelProps) {
   // ── Sync draft reply when a ticket is loaded ──────────────
   useEffect(() => {
     if (ticket) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setDraftReply(ticket.ai_draft_reply)
     } else {
       setDraftReply('')
@@ -108,6 +78,7 @@ export function SlidePanel({ className }: SlidePanelProps) {
   // ── Reset creation form when entering create mode ─────────
   useEffect(() => {
     if (isCreateMode) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setCreateEmail('')
       setCreateMessage('')
       setIsAnalysing(false)
@@ -212,9 +183,10 @@ export function SlidePanel({ className }: SlidePanelProps) {
       
       // Transition slide panel to show the newly created ticket
       dispatch(openPanel(serverTicket.id))
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('AI Analysis failed:', err)
-      setAnalysisError(err.message || 'An unexpected error occurred during analysis.')
+      const errMessage = err instanceof Error ? err.message : 'An unexpected error occurred during analysis.'
+      setAnalysisError(errMessage)
     } finally {
       setIsAnalysing(false)
     }

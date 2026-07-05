@@ -148,10 +148,11 @@ export async function POST(
       { data: data as Ticket, error: null },
       { status: 201 }
     )
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Classification error:', error)
+    const errMessage = error instanceof Error ? error.message : 'An unexpected error occurred during classification.'
     return NextResponse.json(
-      { data: null, error: error.message || 'An unexpected error occurred during classification.' },
+      { data: null, error: errMessage },
       { status: 500 }
     )
   }
