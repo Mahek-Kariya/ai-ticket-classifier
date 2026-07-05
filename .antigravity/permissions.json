@@ -1,0 +1,14 @@
+{
+  "rules": [
+    {
+      "effect": "deny",
+      "action": "read",
+      "resource": ".env.local"
+    },
+    {
+      "effect": "deny",
+      "action": "read",
+      "resource": ".env*.local"
+    }
+  ]
+}
