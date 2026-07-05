@@ -1,9 +1,5 @@
 {
   "fileFilters": {
-    "exclude": [
-      ".env.local",
-      ".env*.local",
-      "*.env"
-    ]
+    "exclude": [".env.local", ".env*.local", "*.env"]
   }
 }
